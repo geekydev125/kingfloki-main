@@ -57,27 +57,27 @@ export const EvolveNFTs = () => {
     setSelectedCount(cnt);
   }, [nftArr]);
 
-  useEffect(() => {
-    const nftData = filterNftData();
-    setNftArr(nftData);
-  }, [evolve]);
+  // useEffect(() => {
+  //   const nftData = filterNftData();
+  //   setNftArr(nftData);
+  // }, [evolve]);
 
   const handleEvolve = () => {
     console.log({ nftArr });
   };
 
-  const filterNftData = () => {
-    const newNftData = [];
-    const nftData = originalNftData;
-    const current_evolve = evolve;
-    for (let i = 0; i < nftData.length; i++) {
-      console.log(current_evolve, nftData[i].rarity);
-      if (current_evolve === nftData[i].rarity) {
-        newNftData.push(nftData[i]);
-      }
-    }
-    return newNftData;
-  };
+  // const filterNftData = () => {
+  //   const newNftData = [];
+  //   const nftData = originalNftData;
+  //   const current_evolve = evolve;
+  //   for (let i = 0; i < nftData.length; i++) {
+  //     console.log(current_evolve, nftData[i].rarity);
+  //     if (current_evolve === nftData[i].rarity) {
+  //       newNftData.push(nftData[i]);
+  //     }
+  //   }
+  //   return newNftData;
+  // };
 
   return (
     <EvolveNFTsContainer>
@@ -127,16 +127,18 @@ export const EvolveNFTs = () => {
             <Warning emoticon={NoNFTSvg} alert="SORRY!! YOU DON’T HAVE WEARABLES TO EVOLVE" />
           )} */}
             <NFTItemList>
-              {nftArr.map((item) => (
-                <div key={item.id} onClick={() => handleNFTData(item.id)}>
-                  <PotionNFT
-                    image={item.image}
-                    primary={item.primary}
-                    secondary={item.secondary}
-                    isSelected={item.isSelected}
-                  />
-                </div>
-              ))}
+              {nftArr
+                .filter((item) => item.rarity === evolve)
+                .map((item) => (
+                  <div key={item.id} onClick={() => handleNFTData(item.id)}>
+                    <PotionNFT
+                      image={item.image}
+                      primary={item.primary}
+                      secondary={item.secondary}
+                      isSelected={item.isSelected}
+                    />
+                  </div>
+                ))}
             </NFTItemList>
           </>
         )}
