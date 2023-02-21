@@ -31,7 +31,6 @@ export const EvolveNFTs = () => {
   };
 
   const handleNFTData = (id: number) => {
-    console.log({ nftArr });
     const newSelected = [...nftArr];
     newSelected[id].isSelected = !newSelected[id].isSelected;
     setNftArr(newSelected);

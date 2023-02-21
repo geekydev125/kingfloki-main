@@ -86,7 +86,6 @@ interface RadioButtonProps {
 export default function RadioButton({ name, label, value, checked, handleChange }: RadioButtonProps) {
   const handleRadioChange = (e: any) => {
     const { id } = e.currentTarget;
-    console.log({ id });
     handleChange(id); // Send back id to radio group for comparison
   };
   return (
