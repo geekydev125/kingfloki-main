@@ -5,31 +5,46 @@ import styled from 'styled-components';
 import { ConnectWarningSvg, NoNFTSvg, MintCardGif } from 'src/config/image';
 import { useAccount } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
-import { NFTData } from 'src/config/nftData';
+import { getNftData } from 'src/config/nftData';
+import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
 
 interface nftDataProps {
   id: number;
+  token_id: number;
   image: string;
   primary: string;
   secondary: string;
+  rarity: string;
   isSelected: boolean;
 }
 
 export const EvolveNFTs = () => {
-  const [isEvolve, setEvolve] = useState('');
+  const [isEvolve, setEvolve] = useState('Commons');
   const { isConnected } = useAccount();
-  const [nftArr, setNftArr] = useState(NFTData);
+  const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
+  const [isLoadingNft, setLoadingNft] = useState(false);
 
   const handleChange = (inputValue: string) => {
     setEvolve(inputValue);
   };
 
   const handleNFTData = (id: number) => {
+    console.log({ nftArr });
     const newSelected = [...nftArr];
     newSelected[id].isSelected = !newSelected[id].isSelected;
     setNftArr(newSelected);
   };
+
+  useEffect(() => {
+    (async () => {
+      setLoadingNft(true);
+      const nftData = await getNftData();
+      console.log({ nftData });
+      setNftArr(nftData);
+      setLoadingNft(false);
+    })();
+  }, []);
 
   useEffect(() => {
     let cnt = 0;
@@ -76,30 +91,36 @@ export const EvolveNFTs = () => {
           <RadioProvider>
             <PotionLabel label="Your Potion" value={3} />
             <SelectLabel label="Selected" value={`${selectedCount}/${nftArr.length}`} />
-            <EvolveButton disabled={false} onClick={handleEvolve}>
+            <EvolveButton disabled={true} onClick={handleEvolve}>
               Evolve
             </EvolveButton>
           </RadioProvider>
         </EvolveNavBarContainer>
       </EvolveNavBar>
       <EvolveContent>
-        {/* {!isConnected ? (
-          <Warning emoticon={ConnectWarningSvg} alert="CONNECT YOUR WALLET TO START EVOLVING YOUR WEARABLES" />
+        {isLoadingNft ? (
+          <GettingNftLoader />
         ) : (
-          <Warning emoticon={NoNFTSvg} alert="SORRY!! YOU DON’T HAVE WEARABLES TO EVOLVE" />
-        )} */}
-        <NFTItemList>
-          {nftArr.map((item) => (
-            <div key={item.id} onClick={() => handleNFTData(item.id)}>
-              <PotionNFT
-                image={item.image}
-                primary={item.primary}
-                secondary={item.secondary}
-                isSelected={item.isSelected}
-              />
-            </div>
-          ))}
-        </NFTItemList>
+          <>
+            {/* {!isConnected ? (
+            <Warning emoticon={ConnectWarningSvg} alert="CONNECT YOUR WALLET TO START EVOLVING YOUR WEARABLES" />
+          ) : (
+            <Warning emoticon={NoNFTSvg} alert="SORRY!! YOU DON’T HAVE WEARABLES TO EVOLVE" />
+          )} */}
+            <NFTItemList>
+              {nftArr.map((item) => (
+                <div key={item.id} onClick={() => handleNFTData(item.id)}>
+                  <PotionNFT
+                    image={item.image}
+                    primary={item.primary}
+                    secondary={item.secondary}
+                    isSelected={item.isSelected}
+                  />
+                </div>
+              ))}
+            </NFTItemList>
+          </>
+        )}
       </EvolveContent>
     </EvolveNFTsContainer>
   );

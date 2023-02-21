@@ -1,16 +1,30 @@
-import { useState } from 'react';
+/* eslint-disable no-console */
+import { useState, useEffect } from 'react';
 import { RxTriangleRight } from 'react-icons/rx';
 import styled, { keyframes } from 'styled-components';
 import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
+import { getConsumableData } from 'src/contracts';
+
+interface consumableTypes {
+  tokenId: number;
+  name: string;
+  description: string;
+  requirements: {
+    rare: number;
+    epic: number;
+    legendary: number;
+  };
+}
 
 export const EvolveMint = () => {
   const [quantity, setQuantity] = useState(0);
   const [freebies, setFreebies] = useState(0);
   const [isLoad, setLoad] = useState(false);
   const [price, setPrice] = useState(0.005);
+  const [consumableData, setConsumableData] = useState<consumableTypes>();
   const { isConnected } = useAccount();
   const handleClick = (symbol: string) => {
     let num = quantity;
@@ -28,6 +42,15 @@ export const EvolveMint = () => {
       setQuantity(num);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      const res = await getConsumableData();
+      setConsumableData(res);
+      console.log({ res });
+    })();
+  }, []);
+
   return (
     <>
       <EvolveBackground src={EvolveBg} alt="evolve-bg" />
@@ -86,7 +109,7 @@ export const EvolveMint = () => {
                 <EvolveTitle>Evolve your NFTs</EvolveTitle>
                 <EvolveTable>
                   <EvolveTr>
-                    <PrimaryLabel>10 Commons</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.rare ?? 0} Commons</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>
@@ -94,7 +117,7 @@ export const EvolveMint = () => {
                   </EvolveTr>
                   <SecondaryLine />
                   <EvolveTr>
-                    <PrimaryLabel>5 Rares</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.epic ?? 0} Rares</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>
@@ -102,7 +125,7 @@ export const EvolveMint = () => {
                   </EvolveTr>
                   <SecondaryLine />
                   <EvolveTr>
-                    <PrimaryLabel>3 Epics</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.legendary ?? 0} Epics</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>

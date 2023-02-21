@@ -67,7 +67,7 @@ export const requestMintRandomNft = async (handleStatus: (value: number) => Prom
     }
 }
 
-const generateTicketApi = async (ownerAddress: any, handleStatus: (value: number) => Promise<void>, idx: number) => {
+const generateTicketApi = async (ownerAddress: string, handleStatus: (value: number) => Promise<void>, idx: number) => {
     let api_call;
     try {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -149,48 +149,26 @@ export const getNftsFromApi = async (handleStatus: (value: number) => Promise<vo
 export const isAbleToConnect = async (address: string | undefined) => {
     if (address !== undefined) {
         console.log("isAbleToConnect")
-        // let isAble = false;
-        // const ownerAddress = await signer.getAddress();
-
-        // const isKingpassHolder = testPass(ownerAddress);
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const kingPass = await axios.get(`https://webhooks.kingfinance.co/userHasKingPass?owner=${address}`)
-        const isKingpassHolder: boolean = kingPass.data.status ?? false;
-
-        // console.log({ isKingpassHolder });
-        // const now = new Date(Date.now()).toUTCString();
-        // const sixteenth = 'Thu, 16 Feb 2023 00:00:00 GMT';
-        // const seventeenth = 'Fri, 17 Feb 2023 00:00:00 GMT';
-
-        // const datum_now = Date.parse(now);
-        // const datum_six = Date.parse(sixteenth);
-        // const datum_seven = Date.parse(seventeenth);
-
-        // if(isKingpassHolder && (datum_now > datum_six)) {
-        //     isAble = true;
-        // } else if(datum_now > datum_seven) {
-        //     isAble = true;
-        // } else {
-        //     isAble = false;
-        // }
-
-        // if you need to set Date, then just delete follwing bottom.
-        return isKingpassHolder
-        // return isAble;
+        let isAble = 0;
+        axios.get('https://webhooks.kingfinance.co/mainConfig?app_id=1').then((res) => {
+            const mintSystem = res.data.mintSystem;
+            if(mintSystem.error === true) {
+                isAble = 2;
+            } else {
+                if(mintSystem.mintRequestPermitted === true && mintSystem.mintPermitted === true) {
+                    isAble = 1;
+                }
+            }
+        }).catch(function(err) {
+            console.log(err);
+        });
+        
+        return isAble;
     }
 }
 
-const testPass = (user_address: string) => {
-    const kingpass_addresses = [
-        "0xE6Aa61C88BC4a178E53aD2d2A3BC0b07Fcfd576a"
-    ]
-    let isActive = false;
-    for (const single_address of kingpass_addresses) {
-        if (single_address === user_address) {
-            isActive = true;
-        }
-    }
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    console.log(`user ${user_address} kingpass status: ${isActive}`);
-    return isActive
+// Consumable
+export const getConsumableData = async () => {
+    const res = await axios.get('https://testwebhooks.kingfinance.co/consumableData');
+    return res.data.consumables_data[0];
 }

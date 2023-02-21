@@ -13,7 +13,7 @@ import {
 } from 'src/contracts';
 import { useAccount } from 'wagmi';
 import styled from 'styled-components';
-import { MintLoader } from 'src/components/Modal/mintLoader';
+import { MintLoader } from 'src/components/Loader/mintLoader';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { WalletConnectButton } from 'src/components/Button';
@@ -26,7 +26,7 @@ export const MingPage = () => {
   const [mintStatus, setMintStatus] = useState(0);
   const [hasPending, setHasPending] = useState(false);
   const [freebies, setFreebies] = useState(0);
-  const [isAbleConnect, setAbleconnect] = useState(false);
+  const [isAbleConnect, setAbleconnect] = useState(0);
   const { address } = useAccount();
 
   const handleClick = (symbol: string) => {
@@ -68,7 +68,7 @@ export const MingPage = () => {
         const _freebies = (await getFreebiesCount()) ?? 0;
         setFreebies(_freebies);
         const isAble = await isAbleToConnect(address);
-        setAbleconnect(isAble ?? false);
+        setAbleconnect(isAble ?? 0);
       })();
     }
   }, [isInitialized]);
@@ -96,7 +96,7 @@ export const MingPage = () => {
       console.log('Got them!!!', isReq);
     }
   }
-  const testClick = async () => {
+  const mintStart = async () => {
     if (freebies > 0) {
       if (freebies < quantity) {
         toast.error('Mints number cannot exceed freebies amount');
@@ -146,16 +146,20 @@ export const MingPage = () => {
       });
   };
 
-  const handleTempClick = () => {
-    toast.error('Be ready to mint on the 17th of February, stay tuned!');
+  const handleTempClick = (status: number) => {
+    if (status === 0) {
+      toast.error('network error: please try again later');
+    } else if (status === 2) {
+      toast.error('Something wrong !!!');
+    }
   };
 
   const checkAbleMint = () => {
     console.log('isAbleConnect: ', isAbleConnect);
-    if (isAbleConnect) {
-      handleContractFunction(async () => await testClick());
+    if (isAbleConnect === 1) {
+      handleContractFunction(async () => await mintStart());
     } else {
-      handleTempClick();
+      handleTempClick(isAbleConnect);
     }
   };
 
