@@ -7,6 +7,8 @@ import { useAccount } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
+import { getConsumableData } from 'src/contracts';
+import { consumableTypes } from './EvolveMint';
 
 interface nftDataProps {
   id: number;
@@ -22,13 +24,23 @@ export const EvolveNFTs = () => {
   const [evolve, setEvolve] = useState('Common');
   const { isConnected } = useAccount();
   const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
-  const [originalNftData, setOriginalNftData] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
+  const [consumableData, setConsumableData] = useState<consumableTypes>();
+  const [commonCnt, setCommonCnt] = useState(0);
+  const [rareCnt, setRareCnt] = useState(0);
+  const [epicCnt, setEpicCnt] = useState(0);
+
+  const commonTotalCount = consumableData?.requirements.common ?? 0;
+  const rareTotalCount = consumableData?.requirements.rare ?? 0;
+  const epicTotalCount = consumableData?.requirements.epic ?? 0;
+
   const isEvolveButtonEnable =
-    (evolve === 'Common' && selectedCount === 10) ||
-    (evolve === 'Rare' && selectedCount === 5) ||
-    (evolve === 'Epic' && selectedCount === 3);
+    (evolve === 'Common' && selectedCount === commonTotalCount) ||
+    (evolve === 'Rare' && selectedCount === rareTotalCount) ||
+    (evolve === 'Epic' && selectedCount === epicTotalCount && consumableData !== undefined);
+
+  const rarityTotalCount = evolve === 'Common' ? commonTotalCount : evolve === 'Rare' ? rareTotalCount : epicTotalCount;
 
   const handleChange = (inputValue: string) => {
     setEvolve(inputValue);
@@ -42,10 +54,22 @@ export const EvolveNFTs = () => {
 
   useEffect(() => {
     (async () => {
+      let _commontCnt = 0;
+      let _rareCnt = 0;
+      let _epicCnt = 0;
       setLoadingNft(true);
       const nftData = await getNftData();
+      const res = await getConsumableData();
+      for (let i = 0; i < nftData.length; i++) {
+        if (nftData[i].rarity === 'Common') _commontCnt++;
+        if (nftData[i].rarity === 'Rare') _rareCnt++;
+        if (nftData[i].rarity === 'Epic') _epicCnt++;
+      }
+      setConsumableData(res);
       setNftArr(nftData);
-      setOriginalNftData(nftData);
+      setCommonCnt(_commontCnt);
+      setRareCnt(_rareCnt);
+      setEpicCnt(_epicCnt);
       setLoadingNft(false);
     })();
   }, []);
@@ -82,6 +106,7 @@ export const EvolveNFTs = () => {
               name="radio"
               label="Commons"
               value="Common"
+              numericValue={commonCnt}
               checked={evolve === 'Common'}
               handleChange={handleChange}
             />
@@ -89,6 +114,7 @@ export const EvolveNFTs = () => {
               name="radio"
               label="Rares"
               value="Rare"
+              numericValue={rareCnt}
               checked={evolve === 'Rare'}
               handleChange={handleChange}
             />
@@ -96,13 +122,14 @@ export const EvolveNFTs = () => {
               name="radio"
               label="Epics"
               value="Epic"
+              numericValue={epicCnt}
               checked={evolve === 'Epic'}
               handleChange={handleChange}
             />
           </RadioController>
           <RadioProvider>
             <PotionLabel label="Your Potion" value={3} />
-            <SelectLabel label="Selected" value={`${selectedCount}/${nftArr.length}`} />
+            <SelectLabel label="Selected" value={`${selectedCount}/${rarityTotalCount}`} />
 
             <EvolveButton disabled={!isEvolveButtonEnable} onClick={handleEvolve}>
               Evolve

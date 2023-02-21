@@ -8,14 +8,14 @@ import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
 import { getConsumableData } from 'src/contracts';
 
-interface consumableTypes {
+export interface consumableTypes {
   tokenId: number;
   name: string;
   description: string;
   requirements: {
+    common: number;
     rare: number;
     epic: number;
-    legendary: number;
   };
 }
 
@@ -47,7 +47,6 @@ export const EvolveMint = () => {
     (async () => {
       const res = await getConsumableData();
       setConsumableData(res);
-      console.log({ res });
     })();
   }, []);
 
@@ -109,7 +108,7 @@ export const EvolveMint = () => {
                 <EvolveTitle>Evolve your NFTs</EvolveTitle>
                 <EvolveTable>
                   <EvolveTr>
-                    <PrimaryLabel>{consumableData?.requirements?.rare ?? 0} Commons</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.common ?? 0} Commons</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>
@@ -117,7 +116,7 @@ export const EvolveMint = () => {
                   </EvolveTr>
                   <SecondaryLine />
                   <EvolveTr>
-                    <PrimaryLabel>{consumableData?.requirements?.epic ?? 0} Rares</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.rare ?? 0} Rares</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>
@@ -125,7 +124,7 @@ export const EvolveMint = () => {
                   </EvolveTr>
                   <SecondaryLine />
                   <EvolveTr>
-                    <PrimaryLabel>{consumableData?.requirements?.legendary ?? 0} Epics</PrimaryLabel>
+                    <PrimaryLabel>{consumableData?.requirements?.epic ?? 0} Epics</PrimaryLabel>
                     <StyledRightArrow>
                       <RxTriangleRight style={{ width: '100%', height: 'auto' }} />
                     </StyledRightArrow>

@@ -75,15 +75,20 @@ const Indicator = styled.div`
   }
 `;
 
+const NumericValue = styled.div`
+  color: #ffffff;
+`;
+
 interface RadioButtonProps {
   name: string;
   label: string;
   value: string;
+  numericValue: number;
   checked: boolean;
   handleChange: (value: string) => void;
 }
 
-export default function RadioButton({ name, label, value, checked, handleChange }: RadioButtonProps) {
+export default function RadioButton({ name, label, value, numericValue, checked, handleChange }: RadioButtonProps) {
   const handleRadioChange = (e: any) => {
     const { id } = e.currentTarget;
     handleChange(id); // Send back id to radio group for comparison
@@ -91,6 +96,7 @@ export default function RadioButton({ name, label, value, checked, handleChange 
   return (
     <Label htmlFor={value}>
       {label}
+      <NumericValue>{numericValue}</NumericValue>
       <Input type="radio" name={name} id={value} value={value} checked={checked} onChange={handleRadioChange} />
       <Indicator />
     </Label>
