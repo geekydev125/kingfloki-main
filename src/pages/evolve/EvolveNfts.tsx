@@ -25,6 +25,10 @@ export const EvolveNFTs = () => {
   const [originalNftData, setOriginalNftData] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
+  const isEvolveButtonEnable =
+    (evolve === 'Common' && selectedCount === 10) ||
+    (evolve === 'Rare' && selectedCount === 5) ||
+    (evolve === 'Epic' && selectedCount === 3);
 
   const handleChange = (inputValue: string) => {
     setEvolve(inputValue);
@@ -56,27 +60,17 @@ export const EvolveNFTs = () => {
     setSelectedCount(cnt);
   }, [nftArr]);
 
-  // useEffect(() => {
-  //   const nftData = filterNftData();
-  //   setNftArr(nftData);
-  // }, [evolve]);
+  useEffect(() => {
+    const tempArr = [...nftArr];
+    for (let i = 0; i < tempArr.length; i++) {
+      tempArr[i].isSelected = false;
+    }
+    setNftArr(tempArr);
+  }, [evolve]);
 
   const handleEvolve = () => {
     console.log({ nftArr });
   };
-
-  // const filterNftData = () => {
-  //   const newNftData = [];
-  //   const nftData = originalNftData;
-  //   const current_evolve = evolve;
-  //   for (let i = 0; i < nftData.length; i++) {
-  //     console.log(current_evolve, nftData[i].rarity);
-  //     if (current_evolve === nftData[i].rarity) {
-  //       newNftData.push(nftData[i]);
-  //     }
-  //   }
-  //   return newNftData;
-  // };
 
   return (
     <EvolveNFTsContainer>
@@ -109,7 +103,8 @@ export const EvolveNFTs = () => {
           <RadioProvider>
             <PotionLabel label="Your Potion" value={3} />
             <SelectLabel label="Selected" value={`${selectedCount}/${nftArr.length}`} />
-            <EvolveButton disabled={true} onClick={handleEvolve}>
+
+            <EvolveButton disabled={!isEvolveButtonEnable} onClick={handleEvolve}>
               Evolve
             </EvolveButton>
           </RadioProvider>

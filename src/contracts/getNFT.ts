@@ -16,7 +16,8 @@ export const getTokenIdsfromMoralis = async () => {
     const nftCount = response.data.result.length;
     if(nftCount > 0) {
         for(let i = 0; i < nftCount; i++) {
-            tokenIds.push(response.data.result[i].token_id);
+            const tokenId = parseInt(response.data.result[i].token_id);
+            tokenIds.push(tokenId);
         }
     }
     return tokenIds;
