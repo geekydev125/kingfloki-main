@@ -19,9 +19,10 @@ interface nftDataProps {
 }
 
 export const EvolveNFTs = () => {
-  const [isEvolve, setEvolve] = useState('Commons');
+  const [evolve, setEvolve] = useState('Common');
   const { isConnected } = useAccount();
   const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
+  const [originalNftData, setOriginalNftData] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
 
@@ -40,8 +41,8 @@ export const EvolveNFTs = () => {
     (async () => {
       setLoadingNft(true);
       const nftData = await getNftData();
-      console.log({ nftData });
       setNftArr(nftData);
+      setOriginalNftData(nftData);
       setLoadingNft(false);
     })();
   }, []);
@@ -56,8 +57,26 @@ export const EvolveNFTs = () => {
     setSelectedCount(cnt);
   }, [nftArr]);
 
+  useEffect(() => {
+    const nftData = filterNftData();
+    setNftArr(nftData);
+  }, [evolve]);
+
   const handleEvolve = () => {
     console.log({ nftArr });
+  };
+
+  const filterNftData = () => {
+    const newNftData = [];
+    const nftData = originalNftData;
+    const current_evolve = evolve;
+    for (let i = 0; i < nftData.length; i++) {
+      console.log(current_evolve, nftData[i].rarity);
+      if (current_evolve === nftData[i].rarity) {
+        newNftData.push(nftData[i]);
+      }
+    }
+    return newNftData;
   };
 
   return (
@@ -69,22 +88,22 @@ export const EvolveNFTs = () => {
             <RadioButton
               name="radio"
               label="Commons"
-              value="Commons"
-              checked={isEvolve === 'Commons'}
+              value="Common"
+              checked={evolve === 'Common'}
               handleChange={handleChange}
             />
             <RadioButton
               name="radio"
               label="Rares"
-              value="Rares"
-              checked={isEvolve === 'Rares'}
+              value="Rare"
+              checked={evolve === 'Rare'}
               handleChange={handleChange}
             />
             <RadioButton
               name="radio"
               label="Epics"
-              value="Epics"
-              checked={isEvolve === 'Epics'}
+              value="Epic"
+              checked={evolve === 'Epic'}
               handleChange={handleChange}
             />
           </RadioController>
