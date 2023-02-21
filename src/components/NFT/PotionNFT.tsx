@@ -29,6 +29,10 @@ const PotionNFTContainer = styled.div`
   width: 240px;
   height: 320px;
   background-color: #2b0707;
+  border: 3px solid transparent;
+  :hover {
+    border: 3px solid #f48e37;
+  }
   cursor: pointer;
   @media screen and (max-width: 640px) {
     width: 180px;
@@ -45,9 +49,6 @@ const PotionNFTWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 11px;
-  :hover {
-    border: 3px solid #f48e37;
-  }
 
   @media screen and (max-width: 640px) {
     padding: 18px;
