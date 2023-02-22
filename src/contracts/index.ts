@@ -1,22 +1,22 @@
 /* eslint-disable no-console */
-import { ethers } from 'ethers';
+import { ethers, Contract } from 'ethers';
 import contracts from './contracts.json';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-let signer: any = null;
-let provider: any = null;
+let signer: any;
+let provider: any
 
-let NFT: any = null;
+let NFT: Contract;
 
-let NFTWithSigner: any = null;
+let NFTWithSigner: Contract;
 
 export const initializeWeb3 = async (provider_: any, signer_: any) => {
     NFTWithSigner = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, signer_);
     NFT = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, provider_);
 
     provider = provider_;
-    signer = await signer_;
+    signer = signer_;
     return true;
 };
 
@@ -171,4 +171,25 @@ export const isAbleToConnect = async (address: string | undefined) => {
 export const getConsumableData = async () => {
     const res = await axios.get('https://testwebhooks.kingfinance.co/consumableData');
     return res.data.consumables_data[0];
+}
+
+export const getConsumablePrice = async (consumableId: number) => {
+    const tx = await NFT.consumables(consumableId);
+    const consumablePrice = {
+        isConsumable: tx.isConsumable,
+        priceInEth: parseFloat(tx.priceInEth),
+        priceInKing: parseFloat(tx.priceInKing),
+        usageId: parseInt(tx.usageId)
+    }
+    return consumablePrice;
+}
+
+export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number) => {
+    const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: 1 });
+    await tx.wait();
+}
+
+export const useConsumable = async (consumableId: number, usageId: number, nftIds: number[], quantity: number[]) => {
+    const tx = await NFTWithSigner.useConsumable(consumableId, 1, usageId, nftIds, quantity);
+    await tx.wait();
 }

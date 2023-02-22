@@ -7,8 +7,10 @@ import { useAccount } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
-import { getConsumableData } from 'src/contracts';
+import { getConsumableData, getConsumablePrice, useConsumable } from 'src/contracts';
 import { consumableTypes } from './EvolveMint';
+import { toast } from 'react-toastify';
+import { BigNumber } from 'ethers';
 
 interface nftDataProps {
   id: number;
@@ -20,6 +22,13 @@ interface nftDataProps {
   isSelected: boolean;
 }
 
+interface consumablePriceProps {
+  isConsumable: boolean;
+  priceInEth: number;
+  priceInKing: number;
+  usageId: number;
+}
+
 export const EvolveNFTs = () => {
   const [evolve, setEvolve] = useState('Common');
   const { isConnected } = useAccount();
@@ -27,9 +36,11 @@ export const EvolveNFTs = () => {
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
   const [consumableData, setConsumableData] = useState<consumableTypes>();
+  const [consumablePrice, setConsumablePrice] = useState<consumablePriceProps>();
   const [commonCnt, setCommonCnt] = useState(0);
   const [rareCnt, setRareCnt] = useState(0);
   const [epicCnt, setEpicCnt] = useState(0);
+  const [isLoad, setLoad] = useState(false);
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
   const rareTotalCount = consumableData?.requirements.rare ?? 0;
@@ -42,16 +53,6 @@ export const EvolveNFTs = () => {
 
   const rarityTotalCount = evolve === 'Common' ? commonTotalCount : evolve === 'Rare' ? rareTotalCount : epicTotalCount;
 
-  const handleChange = (inputValue: string) => {
-    setEvolve(inputValue);
-  };
-
-  const handleNFTData = (id: number) => {
-    const newSelected = [...nftArr];
-    newSelected[id].isSelected = !newSelected[id].isSelected;
-    setNftArr(newSelected);
-  };
-
   useEffect(() => {
     (async () => {
       let _commontCnt = 0;
@@ -60,11 +61,14 @@ export const EvolveNFTs = () => {
       setLoadingNft(true);
       const nftData = await getNftData();
       const res = await getConsumableData();
+      const consumablePrice_ = await getConsumablePrice(res.token_id);
+      console.log({ consumablePrice_ });
       for (let i = 0; i < nftData.length; i++) {
         if (nftData[i].rarity === 'Common') _commontCnt++;
         if (nftData[i].rarity === 'Rare') _rareCnt++;
         if (nftData[i].rarity === 'Epic') _epicCnt++;
       }
+      setConsumablePrice(consumablePrice_);
       setConsumableData(res);
       setNftArr(nftData);
       setCommonCnt(_commontCnt);
@@ -92,8 +96,69 @@ export const EvolveNFTs = () => {
     setNftArr(tempArr);
   }, [evolve]);
 
+  const handleContractFunction = (func: () => Promise<void>) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+    const promise = new Promise(async function (resolve, reject) {
+      try {
+        setLoad(true);
+        await func();
+        resolve('');
+      } catch (err) {
+        reject(err);
+      }
+    });
+    promise
+      .then((result) => {
+        console.log({ result });
+        // toast.success("Congratulations, you have claimed your Kingpass");
+        // toast.success('successMsg');
+        setLoad(false);
+      })
+      .catch((err) => {
+        console.log({ err });
+        // toast.error(`you need to wait at least 24 hours to withdraw your $KING`, err);
+        const revertData = err.reason;
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        toast.error(`Transaction failed: ${revertData}`);
+        // errMsg !== "" ? toast.error(errMsg, err) :
+        setLoad(false);
+      });
+  };
+
+  const handleChange = (inputValue: string) => {
+    setEvolve(inputValue);
+  };
+
+  const handleNFTData = (id: number) => {
+    const newSelected = [...nftArr];
+    newSelected[id].isSelected = !newSelected[id].isSelected;
+    setNftArr(newSelected);
+  };
+
   const handleEvolve = () => {
-    console.log({ nftArr });
+    const tokenIds: number[] = [];
+    const quantities: number[] = [];
+    for (let i = 0; i < nftArr.length; i++) {
+      if (nftArr[i].isSelected) {
+        let quantity = 1;
+        for (let j = 0; j < tokenIds.length; j++) {
+          if (nftArr[i].token_id === tokenIds[j]) {
+            quantity++;
+            tokenIds[j] = quantity;
+          }
+        }
+        if (quantity === 1) {
+          tokenIds.push(nftArr[i].token_id);
+          quantities.push(quantity);
+        }
+      }
+    }
+    const usageId = consumablePrice?.usageId;
+    const tokenId = consumableData?.token_id;
+    if (usageId !== undefined && tokenId !== undefined) {
+      console.log({ tokenId, usageId, tokenIds, quantities });
+      handleContractFunction(async () => await useConsumable(tokenId, usageId, tokenIds, quantities));
+    }
   };
 
   return (

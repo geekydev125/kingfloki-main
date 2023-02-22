@@ -6,10 +6,11 @@ import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
-import { getConsumableData } from 'src/contracts';
+import { getConsumableData, buyConsumable } from 'src/contracts';
+import { toast } from 'react-toastify';
 
 export interface consumableTypes {
-  tokenId: number;
+  token_id: number;
   name: string;
   description: string;
   requirements: {
@@ -25,7 +26,8 @@ export const EvolveMint = () => {
   const [isLoad, setLoad] = useState(false);
   const [price, setPrice] = useState(0.005);
   const [consumableData, setConsumableData] = useState<consumableTypes>();
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+
   const handleClick = (symbol: string) => {
     let num = quantity;
     if (symbol === 'minus') {
@@ -46,9 +48,44 @@ export const EvolveMint = () => {
   useEffect(() => {
     (async () => {
       const res = await getConsumableData();
+      console.log({ res });
       setConsumableData(res);
     })();
   }, []);
+
+  const handleContractFunction = (func: () => Promise<void>) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+    const promise = new Promise(async function (resolve, reject) {
+      try {
+        setLoad(true);
+        await func();
+        resolve('');
+      } catch (err) {
+        reject(err);
+      }
+    });
+    promise
+      .then((result) => {
+        console.log({ result });
+        // toast.success("Congratulations, you have claimed your Kingpass");
+        // toast.success('successMsg');
+        setLoad(false);
+      })
+      .catch((err) => {
+        console.log({ err });
+        // toast.error(`you need to wait at least 24 hours to withdraw your $KING`, err);
+        const revertData = err.reason;
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        toast.error(`Transaction failed: ${revertData}`);
+        // errMsg !== "" ? toast.error(errMsg, err) :
+        setLoad(false);
+      });
+  };
+
+  const handleMint = () => {
+    const tokenId = consumableData?.token_id;
+    handleContractFunction(async () => await buyConsumable(address, tokenId, quantity));
+  };
 
   return (
     <>
@@ -85,7 +122,9 @@ export const EvolveMint = () => {
                       </MintButton>
                     )} */}
                     {isConnected ? (
-                      <MintButton disabled={isLoad}>{isLoad ? <Spinner /> : 'Mint Now'}</MintButton>
+                      <MintButton disabled={isLoad} onClick={() => handleMint()}>
+                        {isLoad ? <Spinner /> : 'Mint Now'}
+                      </MintButton>
                     ) : (
                       <WalletConnectButton />
                     )}

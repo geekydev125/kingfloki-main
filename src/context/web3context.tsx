@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAccount, useProvider, useSigner } from 'wagmi';
 import { initializeWeb3 } from 'src/contracts';
+import { Signer } from 'ethers';
 
 interface Web3ContextProps {
   isConnected: boolean;
