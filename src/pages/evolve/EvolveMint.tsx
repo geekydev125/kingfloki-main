@@ -25,7 +25,7 @@ export const EvolveMint = () => {
   const [quantity, setQuantity] = useState(1);
   const [freebies, setFreebies] = useState(0);
   const [isLoad, setLoad] = useState(false);
-  const [price, setPrice] = useState(0.005);
+  const [price, setPrice] = useState('0.005');
   const [consumableData, setConsumableData] = useState<consumableTypes>();
   const [consumablePrice, setConsumablePrice] = useState<consumablePriceProps>();
   const { isConnected, address } = useAccount();
@@ -135,7 +135,7 @@ export const EvolveMint = () => {
                     )}
                   </MintButtonBox>
                 </MintPotionAction>
-                <MintPotionFooter>
+                {/* <MintPotionFooter>
                   <EtherValueContainer>
                     <EtherIcon src={EthereumSvg} alt="ethereum-icon" />
                     <EtherValue>{isConnected ? (price === 0 ? '-' : price) : '-'} ETH</EtherValue>
@@ -144,6 +144,28 @@ export const EvolveMint = () => {
                     <Label>Freebies</Label>
                     <FreebiesValue>{isConnected ? (freebies === 0 ? '-' : freebies) : '-'}</FreebiesValue>
                   </EtherValueContainer>
+                </MintPotionFooter> */}
+                <MintPotionFooter>
+                  <EtherValueContainer>
+                    <Label>
+                      <EtherIcon src={EthereumSvg} alt="ethereum-icon" />
+                      Price
+                    </Label>
+                    <EtherValue>{isConnected ? (price === '0' ? '-' : price) : '-'} ETH</EtherValue>
+                  </EtherValueContainer>
+                  <EtherValueContainer>
+                    <Label>
+                      <EtherIcon src={EthereumSvg} alt="ethereum-icon" />
+                      Total
+                    </Label>
+                    <EtherValue>
+                      {isConnected ? (price === '0' ? '-' : (parseFloat(price) * quantity).toFixed(3)) : '-'} ETH
+                    </EtherValue>
+                  </EtherValueContainer>
+                  <FreebiesContainer>
+                    <FreebiesLabel>Freebies</FreebiesLabel>
+                    <FreebiesValue>{freebies}</FreebiesValue>
+                  </FreebiesContainer>
                 </MintPotionFooter>
               </MintPotionContainer>
             </MintPotion>
@@ -373,13 +395,18 @@ const MintPotionFooter = styled.div`
 `;
 
 const EtherValueContainer = styled.div`
-  display: flex;
+  /* display: flex;
   gap: 15px;
   justify-content: center;
   align-items: center;
   @media screen and (max-width: 960px) {
     gap: 9px;
-  }
+  } */
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const EtherIcon = styled.img`
@@ -399,10 +426,20 @@ const EtherValue = styled.div`
 `;
 
 const Label = styled.div`
-  color: #f2f5f4;
+  /* color: #f2f5f4;
   font-size: 15px;
   @media screen and (max-width: 960px) {
     font-size: 12px;
+  } */
+  font-size: 13px;
+  color: #ff7b03;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  @media screen and (max-width: 960px) {
+    font-size: 10px;
   }
 `;
 
@@ -506,3 +543,13 @@ const StyledRightArrow = styled.div`
   width: 20px;
   height: 16px;
 `;
+
+const FreebiesContainer = styled.div`
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const FreebiesLabel = EtherValue;
