@@ -174,14 +174,16 @@ export const getConsumableData = async () => {
 }
 
 export const getConsumablePrice = async (consumableId: number) => {
-    const tx = await NFT.consumables(consumableId);
-    const consumablePrice = {
-        isConsumable: tx.isConsumable,
-        priceInEth: parseFloat(tx.priceInEth),
-        priceInKing: parseFloat(tx.priceInKing),
-        usageId: parseInt(tx.usageId)
+    if(provider !== null && provider !== undefined) {
+        const tx = await NFT.consumables(consumableId);
+        const consumablePrice = {
+            isConsumable: tx.isConsumable,
+            priceInEth: parseFloat(tx.priceInEth),
+            priceInKing: parseFloat(tx.priceInKing),
+            usageId: parseInt(tx.usageId)
+        }
+        return consumablePrice;
     }
-    return consumablePrice;
 }
 
 export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number) => {
