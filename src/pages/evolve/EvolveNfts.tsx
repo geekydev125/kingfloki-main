@@ -13,6 +13,7 @@ import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
 import { MiniSpinner } from 'src/components/Spinner';
 import { potionProps } from '.';
+import { useWeb3Store } from 'src/context/web3context';
 
 interface nftDataProps {
   id: number;
@@ -64,6 +65,7 @@ export const EvolveNFTs = (props: potionProps) => {
   const [rareCnt, setRareCnt] = useState(0);
   const [epicCnt, setEpicCnt] = useState(0);
   const [isLoad, setLoad] = useState(false);
+  const { isInitialized } = useWeb3Store();
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
   const rareTotalCount = consumableData?.requirements.rare ?? 0;
@@ -106,8 +108,15 @@ export const EvolveNFTs = (props: potionProps) => {
   };
 
   useEffect(() => {
-    evolveNftInitialize();
-  }, []);
+    if (isInitialized) evolveNftInitialize();
+    else {
+      setNftArr([]);
+      setCommonCnt(0);
+      setRareCnt(0);
+      setEpicCnt(0);
+      setPotionCount(0);
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     let cnt = 0;
@@ -191,7 +200,10 @@ export const EvolveNFTs = (props: potionProps) => {
       handleContractFunction(
         async () =>
           await useConsumable(tokenId, usageId, tokenIds, quantities).then(async () => {
-            await evolveNftInitialize();
+            setLoadingNft(true);
+            setTimeout(async () => {
+              await evolveNftInitialize();
+            }, 4000);
           }),
         'Evolution completed!'
       );

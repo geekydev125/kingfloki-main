@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable no-console */
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -26,6 +27,7 @@ export const MingPage = () => {
   const [mintStatus, setMintStatus] = useState(0);
   const [hasPending, setHasPending] = useState(false);
   const [freebies, setFreebies] = useState(0);
+  const [pendingNftCnt, setPendingNftCnt] = useState(0);
   const [isAbleConnect, setAbleconnect] = useState(0);
   const { address } = useAccount();
 
@@ -46,30 +48,35 @@ export const MingPage = () => {
     }
   };
   const [randomMintCost, setRandomMintCost] = useState('0');
+  const mintPageInitialized = async () => {
+    const cost = await NFTMintCostInEth();
+    // const cost = 0.033;
+    if (cost !== undefined) {
+      const _cost = parseFloat(ethers.utils.formatEther(cost.toString())).toFixed(4);
+      // setRandomMintCost(ethers.utils.formatEther(cost));
+      setRandomMintCost(_cost.toString());
+    }
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const api_call = await axios.get(`https://testwebhooks.kingfinance.co/pendingNfts?owner=${address}`);
+    /* eslint-disable no-console */
+    console.log('we?', api_call);
+    const awaiting_mints = api_call.data.data.length;
+    setPendingNftCnt(awaiting_mints);
+    if (awaiting_mints !== 0) {
+      setHasPending(true);
+      console.log('setHasPending', 'true');
+    } else {
+      setHasPending(false);
+      console.log('setHasPending', 'false');
+    }
+    const _freebies = (await getFreebiesCount()) ?? 0;
+    setFreebies(_freebies);
+    const isAble = await isAbleToConnect(address);
+    setAbleconnect(isAble ?? 0);
+  };
   useEffect(() => {
     if (isInitialized) {
-      (async () => {
-        const cost = await NFTMintCostInEth();
-        // const cost = 0.033;
-        if (cost !== undefined) {
-          const _cost = parseFloat(ethers.utils.formatEther(cost.toString())).toFixed(4);
-          // setRandomMintCost(ethers.utils.formatEther(cost));
-          setRandomMintCost(_cost.toString());
-        }
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const api_call = await axios.get(`https://testwebhooks.kingfinance.co/pendingNfts?owner=${address}`);
-        /* eslint-disable no-console */
-        console.log('we?', api_call);
-        const awaiting_mints = api_call.data.data.length;
-        if (awaiting_mints !== 0) {
-          setHasPending(true);
-        }
-
-        const _freebies = (await getFreebiesCount()) ?? 0;
-        setFreebies(_freebies);
-        const isAble = await isAbleToConnect(address);
-        setAbleconnect(isAble ?? 0);
-      })();
+      mintPageInitialized();
     }
   }, [isInitialized]);
 
@@ -193,11 +200,16 @@ export const MingPage = () => {
                     <MintButton
                       disabled={isLoad}
                       onClick={() => {
-                        handleContractFunction(async () => await _getNftsFromApi());
+                        handleContractFunction(
+                          async () =>
+                            await _getNftsFromApi().then(async () => {
+                              await mintPageInitialized();
+                            })
+                        );
                         console.log('_getNftsFromApi');
                       }}
                     >
-                      {isLoad ? <Spinner /> : 'Get Pending NFTs'}
+                      {isLoad ? <Spinner /> : `Get Pending NFTs ${pendingNftCnt}`}
                     </MintButton>
                   )}
                   {isConnected ? (

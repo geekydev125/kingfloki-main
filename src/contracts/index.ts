@@ -3,7 +3,6 @@ import { ethers, Contract } from 'ethers';
 import contracts from './contracts.json';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { getNftData } from 'src/config/nftData';
 
 let signer: any;
 let provider: any
