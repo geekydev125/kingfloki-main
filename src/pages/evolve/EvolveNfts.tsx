@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import RadioButton from 'src/components/Radio';
@@ -31,7 +32,7 @@ export interface consumablePriceProps {
 
 export const EvolveNFTs = () => {
   const [evolve, setEvolve] = useState('Common');
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
@@ -59,7 +60,7 @@ export const EvolveNFTs = () => {
       let _rareCnt = 0;
       let _epicCnt = 0;
       setLoadingNft(true);
-      const nftData = await getNftData();
+      const nftData = await getNftData(address);
       const res = await getConsumableData();
       const consumablePrice_ = await getConsumablePrice(res.token_id);
       console.log({ consumablePrice_ });
@@ -135,7 +136,7 @@ export const EvolveNFTs = () => {
     setNftArr(newSelected);
   };
 
-  const handleEvolve = () => {
+  const handleEvolve = async () => {
     const tokenIds: number[] = [];
     const quantities: number[] = [];
     for (let i = 0; i < nftArr.length; i++) {
@@ -159,12 +160,13 @@ export const EvolveNFTs = () => {
       console.log({ tokenId, usageId, tokenIds, quantities });
       handleContractFunction(async () => await useConsumable(tokenId, usageId, tokenIds, quantities));
     }
+    await getNftData(address);
   };
 
   return (
     <EvolveNFTsContainer>
       <EvolveNavBar>
-        <MobilePotionLabel label="Your Potion" value={3} />
+        <MobilePotionLabel label="Your Potions" value={3} />
         <EvolveNavBarContainer>
           <RadioController>
             <RadioButton
@@ -193,10 +195,10 @@ export const EvolveNFTs = () => {
             />
           </RadioController>
           <RadioProvider>
-            <PotionLabel label="Your Potion" value={3} />
+            <PotionLabel label="Your Potions" value={3} />
             <SelectLabel label="Selected" value={`${selectedCount}/${rarityTotalCount}`} />
 
-            <EvolveButton disabled={!isEvolveButtonEnable || isLoad} onClick={handleEvolve}>
+            <EvolveButton disabled={!isEvolveButtonEnable || isLoad} onClick={async () => await handleEvolve()}>
               {isLoad ? <Spinner /> : 'Evolve'}
             </EvolveButton>
           </RadioProvider>
