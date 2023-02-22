@@ -22,7 +22,7 @@ export interface consumableTypes {
 }
 
 export const EvolveMint = () => {
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [freebies, setFreebies] = useState(0);
   const [isLoad, setLoad] = useState(false);
   const [price, setPrice] = useState(0.005);
@@ -108,7 +108,7 @@ export const EvolveMint = () => {
                     <MintInput
                       type="number"
                       min={1}
-                      value={quantity === 0 ? 1 : quantity}
+                      value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
                     />
                     <OperationBtn onClick={() => handleClick('plus')}>+</OperationBtn>

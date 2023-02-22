@@ -189,6 +189,7 @@ export const getConsumablePrice = async (consumableId: number) => {
 export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number, priceEth: number | undefined) => {
     let value_ = 0;
     if(priceEth != null) value_ = quantity * priceEth;
+    console.log({ value_, priceEth, quantity })
     const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: value_ });
     await tx.wait();
 }
