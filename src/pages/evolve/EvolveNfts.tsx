@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import RadioButton from 'src/components/Radio';
 import styled from 'styled-components';
 import { ConnectWarningSvg, NoNFTSvg, MintCardGif } from 'src/config/image';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
@@ -53,6 +53,8 @@ export const EvolveNFTs = (props: potionProps) => {
   const { potionCount, setPotionCount } = props;
   const [evolve, setEvolve] = useState('Common');
   const { isConnected, address } = useAccount();
+  const { chain } = useNetwork();
+  const chainId = chain?.id;
   const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
   const [selectedCount, setSelectedCount] = useState(0);
   const [isLoadingNft, setLoadingNft] = useState(false);
@@ -78,7 +80,7 @@ export const EvolveNFTs = (props: potionProps) => {
     let _commontCnt = 0;
     let _rareCnt = 0;
     let _epicCnt = 0;
-    const nftData = await getNftData(address);
+    const nftData = await getNftData(address, chainId);
     for (let i = 0; i < nftData.length; i++) {
       if (nftData[i].rarity === 'Common') _commontCnt++;
       if (nftData[i].rarity === 'Rare') _rareCnt++;

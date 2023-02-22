@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getTokenIdsfromMoralis } from "src/contracts/getNFT";
 
-export const getNftData = async (address: string | undefined) => {
-    const tokenIds = await getTokenIdsfromMoralis(address);
+export const getNftData = async (address: string | undefined, chain: number | undefined) => {
+    const tokenIds = await getTokenIdsfromMoralis(address, chain);
     const nftData = [];
         const response_info = await axios.post(
             `https://testwebhooks.kingfinance.co/bulkTokenInfo`,
