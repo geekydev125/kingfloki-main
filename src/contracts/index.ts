@@ -190,6 +190,7 @@ export const buyConsumable = async (addy: string | undefined, consumableId: numb
 }
 
 export const useConsumable = async (consumableId: number, usageId: number, nftIds: number[], quantity: number[]) => {
-    const tx = await NFTWithSigner.useConsumable(consumableId, 1, usageId, nftIds, quantity);
+    const tx = await NFTWithSigner.useConsumable(consumableId, usageId, 1, nftIds, quantity);
+    console.log({ consumableId, usageId, nftIds, quantity })
     await tx.wait();
 }

@@ -11,6 +11,7 @@ import { getConsumableData, getConsumablePrice, useConsumable } from 'src/contra
 import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
 import { BigNumber } from 'ethers';
+import { Spinner } from 'src/components/Spinner';
 
 interface nftDataProps {
   id: number;
@@ -196,8 +197,8 @@ export const EvolveNFTs = () => {
             <PotionLabel label="Your Potion" value={3} />
             <SelectLabel label="Selected" value={`${selectedCount}/${rarityTotalCount}`} />
 
-            <EvolveButton disabled={!isEvolveButtonEnable} onClick={handleEvolve}>
-              Evolve
+            <EvolveButton disabled={!isEvolveButtonEnable || isLoad} onClick={handleEvolve}>
+              {isLoad ? <Spinner /> : 'Evolve'}
             </EvolveButton>
           </RadioProvider>
         </EvolveNavBarContainer>

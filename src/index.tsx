@@ -19,7 +19,7 @@ import {
   coinbaseWallet
 } from '@rainbow-me/rainbowkit/wallets';
 import { configureChains, createClient, mainnet, WagmiConfig } from 'wagmi';
-/* import { polygonMumbai } from 'wagmi/chains'; */
+import { polygonMumbai } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 
@@ -31,7 +31,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 window.Buffer = require('buffer').Buffer;
 
 const { chains, provider } = configureChains(
-  [mainnet],
+  [polygonMumbai],
   [alchemyProvider({ apiKey: '2bUhHtQMTtBoddEB-hRwtnL6fZ6Y5Gnu' }), publicProvider()]
 );
 
