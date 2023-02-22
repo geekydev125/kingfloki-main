@@ -127,7 +127,7 @@ export const EvolveNFTs = (props: potionProps) => {
     setNftArr(tempArr);
   }, [evolve]);
 
-  const handleContractFunction = (func: () => Promise<void>) => {
+  const handleContractFunction = (func: () => Promise<void>, successMsg: string) => {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
     const promise = new Promise(async function (resolve, reject) {
       try {
@@ -142,7 +142,7 @@ export const EvolveNFTs = (props: potionProps) => {
       .then((result) => {
         console.log({ result });
         // toast.success("Congratulations, you have claimed your Kingpass");
-        // toast.success('successMsg');
+        toast.success(successMsg);
         setLoad(false);
       })
       .catch((err) => {
@@ -188,9 +188,14 @@ export const EvolveNFTs = (props: potionProps) => {
     const tokenId = consumableData?.token_id;
     if (usageId !== undefined && tokenId !== undefined) {
       console.log({ tokenId, usageId, tokenIds, quantities });
-      handleContractFunction(async () => await useConsumable(tokenId, usageId, tokenIds, quantities));
+      handleContractFunction(
+        async () =>
+          await useConsumable(tokenId, usageId, tokenIds, quantities).then(async () => {
+            await evolveNftInitialize();
+          }),
+        'Evolution completed!'
+      );
     }
-    await evolveNftInitialize();
   };
 
   return (
