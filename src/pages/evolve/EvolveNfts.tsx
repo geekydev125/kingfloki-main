@@ -10,7 +10,6 @@ import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
 import { getConsumableData, getConsumablePrice, useConsumable } from 'src/contracts';
 import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
-import { BigNumber } from 'ethers';
 import { Spinner } from 'src/components/Spinner';
 
 interface nftDataProps {
@@ -23,7 +22,7 @@ interface nftDataProps {
   isSelected: boolean;
 }
 
-interface consumablePriceProps {
+export interface consumablePriceProps {
   isConsumable: boolean;
   priceInEth: number;
   priceInKing: number;

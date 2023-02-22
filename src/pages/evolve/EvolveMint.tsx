@@ -6,8 +6,9 @@ import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
-import { getConsumableData, buyConsumable } from 'src/contracts';
+import { getConsumableData, buyConsumable, getConsumablePrice } from 'src/contracts';
 import { toast } from 'react-toastify';
+import { consumablePriceProps } from './EvolveNfts';
 
 export interface consumableTypes {
   token_id: number;
@@ -26,6 +27,7 @@ export const EvolveMint = () => {
   const [isLoad, setLoad] = useState(false);
   const [price, setPrice] = useState(0.005);
   const [consumableData, setConsumableData] = useState<consumableTypes>();
+  const [consumablePrice, setConsumablePrice] = useState<consumablePriceProps>();
   const { isConnected, address } = useAccount();
 
   const handleClick = (symbol: string) => {
@@ -48,6 +50,8 @@ export const EvolveMint = () => {
   useEffect(() => {
     (async () => {
       const res = await getConsumableData();
+      const consumablePrice_ = await getConsumablePrice(res.token_id);
+      setConsumablePrice(consumablePrice_);
       console.log({ res });
       setConsumableData(res);
     })();
@@ -84,7 +88,8 @@ export const EvolveMint = () => {
 
   const handleMint = () => {
     const tokenId = consumableData?.token_id;
-    handleContractFunction(async () => await buyConsumable(address, tokenId, quantity));
+    const priceEth = consumablePrice?.priceInEth;
+    handleContractFunction(async () => await buyConsumable(address, tokenId, quantity, priceEth));
   };
 
   return (
