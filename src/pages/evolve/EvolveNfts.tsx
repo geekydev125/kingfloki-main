@@ -12,6 +12,7 @@ import { getConsumableData, getConsumablePrice, getPotionCount, useConsumable } 
 import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
 import { MiniSpinner } from 'src/components/Spinner';
+import { potionProps } from '.';
 
 interface nftDataProps {
   id: number;
@@ -30,7 +31,26 @@ export interface consumablePriceProps {
   usageId: number;
 }
 
-export const EvolveNFTs = () => {
+export interface getConsumableProps {
+  setConsumablePrice: (value: consumablePriceProps | undefined) => void;
+  setConsumableData: (value: consumableTypes) => void;
+  setPotionCount: (value: number) => void;
+  address: string | undefined;
+}
+
+export const getConsumable = async (props: getConsumableProps) => {
+  const { setConsumablePrice, setConsumableData, setPotionCount, address } = props;
+  const res = await getConsumableData();
+  const consumablePrice_ = await getConsumablePrice(res.token_id);
+  console.log({ consumablePrice_ });
+  const potionCnt = await getPotionCount(address, res.token_id);
+  setConsumablePrice(consumablePrice_);
+  setConsumableData(res);
+  setPotionCount(potionCnt);
+};
+
+export const EvolveNFTs = (props: potionProps) => {
+  const { potionCount, setPotionCount } = props;
   const [evolve, setEvolve] = useState('Common');
   const { isConnected, address } = useAccount();
   const [nftArr, setNftArr] = useState<nftDataProps[]>([]);
@@ -41,7 +61,6 @@ export const EvolveNFTs = () => {
   const [commonCnt, setCommonCnt] = useState(0);
   const [rareCnt, setRareCnt] = useState(0);
   const [epicCnt, setEpicCnt] = useState(0);
-  const [potionCount, setPotionCount] = useState(0);
   const [isLoad, setLoad] = useState(false);
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
@@ -55,28 +74,32 @@ export const EvolveNFTs = () => {
 
   const rarityTotalCount = evolve === 'Common' ? commonTotalCount : evolve === 'Rare' ? rareTotalCount : epicTotalCount;
 
-  const evolveNftInitialize = async () => {
+  const getNft = async () => {
     let _commontCnt = 0;
     let _rareCnt = 0;
     let _epicCnt = 0;
-    setLoadingNft(true);
     const nftData = await getNftData(address);
-    const res = await getConsumableData();
-    const consumablePrice_ = await getConsumablePrice(res.token_id);
-    console.log({ consumablePrice_ });
     for (let i = 0; i < nftData.length; i++) {
       if (nftData[i].rarity === 'Common') _commontCnt++;
       if (nftData[i].rarity === 'Rare') _rareCnt++;
       if (nftData[i].rarity === 'Epic') _epicCnt++;
     }
-    const potionCnt = await getPotionCount(address, res.token_id);
-    setPotionCount(potionCnt);
-    setConsumablePrice(consumablePrice_);
-    setConsumableData(res);
     setNftArr(nftData);
     setCommonCnt(_commontCnt);
     setRareCnt(_rareCnt);
     setEpicCnt(_epicCnt);
+  };
+
+  const evolveNftInitialize = async () => {
+    setLoadingNft(true);
+    await getNft();
+    const props = {
+      setConsumablePrice,
+      setConsumableData,
+      setPotionCount,
+      address
+    };
+    await getConsumable(props);
     setLoadingNft(false);
   };
 

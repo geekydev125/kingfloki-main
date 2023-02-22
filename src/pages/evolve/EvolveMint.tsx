@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { RxTriangleRight } from 'react-icons/rx';
@@ -6,9 +7,10 @@ import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
-import { getConsumableData, buyConsumable, getConsumablePrice } from 'src/contracts';
+import { getConsumableData, buyConsumable, getConsumablePrice, getPotionCount } from 'src/contracts';
 import { toast } from 'react-toastify';
-import { consumablePriceProps } from './EvolveNfts';
+import { consumablePriceProps, getConsumable } from './EvolveNfts';
+import { potionProps } from '.';
 
 export interface consumableTypes {
   token_id: number;
@@ -21,7 +23,8 @@ export interface consumableTypes {
   };
 }
 
-export const EvolveMint = () => {
+export const EvolveMint = (props: potionProps) => {
+  const { potionCount, setPotionCount } = props;
   const [quantity, setQuantity] = useState(1);
   const [freebies, setFreebies] = useState(0);
   const [isLoad, setLoad] = useState(false);
@@ -86,13 +89,19 @@ export const EvolveMint = () => {
       });
   };
 
-  const handleMint = () => {
+  const handleMint = async () => {
     const tokenId = consumableData?.token_id;
-    const priceEth = consumablePrice?.priceInEth;
-    handleContractFunction(
-      async () => await buyConsumable(address, tokenId, quantity, priceEth),
-      `${quantity} Potions bought!`
-    );
+    if (tokenId !== undefined) {
+      const priceEth = consumablePrice?.priceInEth;
+      handleContractFunction(
+        async () =>
+          await buyConsumable(address, tokenId, quantity, priceEth).then(() => {
+            const potionCnt = potionCount + quantity;
+            setPotionCount(potionCnt);
+          }),
+        `${quantity} Potions bought!`
+      );
+    }
   };
 
   return (
@@ -130,7 +139,7 @@ export const EvolveMint = () => {
                       </MintButton>
                     )} */}
                     {isConnected ? (
-                      <MintButton disabled={isLoad} onClick={() => handleMint()}>
+                      <MintButton disabled={isLoad} onClick={async () => await handleMint()}>
                         {isLoad ? <Spinner /> : 'Mint Now'}
                       </MintButton>
                     ) : (
