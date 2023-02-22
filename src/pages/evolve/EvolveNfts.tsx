@@ -8,10 +8,10 @@ import { useAccount } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
-import { getConsumableData, getConsumablePrice, useConsumable } from 'src/contracts';
+import { getConsumableData, getConsumablePrice, getPotionCount, useConsumable } from 'src/contracts';
 import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
-import { Spinner } from 'src/components/Spinner';
+import { MiniSpinner } from 'src/components/Spinner';
 
 interface nftDataProps {
   id: number;
@@ -41,6 +41,7 @@ export const EvolveNFTs = () => {
   const [commonCnt, setCommonCnt] = useState(0);
   const [rareCnt, setRareCnt] = useState(0);
   const [epicCnt, setEpicCnt] = useState(0);
+  const [potionCount, setPotionCount] = useState(0);
   const [isLoad, setLoad] = useState(false);
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
@@ -54,29 +55,33 @@ export const EvolveNFTs = () => {
 
   const rarityTotalCount = evolve === 'Common' ? commonTotalCount : evolve === 'Rare' ? rareTotalCount : epicTotalCount;
 
+  const evolveNftInitialize = async () => {
+    let _commontCnt = 0;
+    let _rareCnt = 0;
+    let _epicCnt = 0;
+    setLoadingNft(true);
+    const nftData = await getNftData(address);
+    const res = await getConsumableData();
+    const consumablePrice_ = await getConsumablePrice(res.token_id);
+    console.log({ consumablePrice_ });
+    for (let i = 0; i < nftData.length; i++) {
+      if (nftData[i].rarity === 'Common') _commontCnt++;
+      if (nftData[i].rarity === 'Rare') _rareCnt++;
+      if (nftData[i].rarity === 'Epic') _epicCnt++;
+    }
+    const potionCnt = await getPotionCount(address, res.token_id);
+    setPotionCount(potionCnt);
+    setConsumablePrice(consumablePrice_);
+    setConsumableData(res);
+    setNftArr(nftData);
+    setCommonCnt(_commontCnt);
+    setRareCnt(_rareCnt);
+    setEpicCnt(_epicCnt);
+    setLoadingNft(false);
+  };
+
   useEffect(() => {
-    (async () => {
-      let _commontCnt = 0;
-      let _rareCnt = 0;
-      let _epicCnt = 0;
-      setLoadingNft(true);
-      const nftData = await getNftData(address);
-      const res = await getConsumableData();
-      const consumablePrice_ = await getConsumablePrice(res.token_id);
-      console.log({ consumablePrice_ });
-      for (let i = 0; i < nftData.length; i++) {
-        if (nftData[i].rarity === 'Common') _commontCnt++;
-        if (nftData[i].rarity === 'Rare') _rareCnt++;
-        if (nftData[i].rarity === 'Epic') _epicCnt++;
-      }
-      setConsumablePrice(consumablePrice_);
-      setConsumableData(res);
-      setNftArr(nftData);
-      setCommonCnt(_commontCnt);
-      setRareCnt(_rareCnt);
-      setEpicCnt(_epicCnt);
-      setLoadingNft(false);
-    })();
+    evolveNftInitialize();
   }, []);
 
   useEffect(() => {
@@ -160,13 +165,13 @@ export const EvolveNFTs = () => {
       console.log({ tokenId, usageId, tokenIds, quantities });
       handleContractFunction(async () => await useConsumable(tokenId, usageId, tokenIds, quantities));
     }
-    await getNftData(address);
+    await evolveNftInitialize();
   };
 
   return (
     <EvolveNFTsContainer>
       <EvolveNavBar>
-        <MobilePotionLabel label="Your Potions" value={3} />
+        <MobilePotionLabel label="Your Potions" value={potionCount} />
         <EvolveNavBarContainer>
           <RadioController>
             <RadioButton
@@ -195,11 +200,11 @@ export const EvolveNFTs = () => {
             />
           </RadioController>
           <RadioProvider>
-            <PotionLabel label="Your Potions" value={3} />
+            <PotionLabel label="Your Potions" value={potionCount} />
             <SelectLabel label="Selected" value={`${selectedCount}/${rarityTotalCount}`} />
 
             <EvolveButton disabled={!isEvolveButtonEnable || isLoad} onClick={async () => await handleEvolve()}>
-              {isLoad ? <Spinner /> : 'Evolve'}
+              {isLoad ? <MiniSpinner /> : 'Evolve'}
             </EvolveButton>
           </RadioProvider>
         </EvolveNavBarContainer>
@@ -402,7 +407,7 @@ interface EvolveButtonProps {
   disabled?: boolean;
 }
 
-const EvolveButton = styled.div<EvolveButtonProps>`
+const EvolveButton = styled.button<EvolveButtonProps>`
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -413,6 +418,8 @@ const EvolveButton = styled.div<EvolveButtonProps>`
   background-color: #f48e37;
   width: 113px;
   height: 42px;
+  border: none;
+  color: #000000;
   opacity: ${(props) => (props.disabled ?? false ? 0.5 : 1)};
 `;
 

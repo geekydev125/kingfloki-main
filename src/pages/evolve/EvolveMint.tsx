@@ -57,7 +57,7 @@ export const EvolveMint = () => {
     })();
   }, []);
 
-  const handleContractFunction = (func: () => Promise<void>) => {
+  const handleContractFunction = (func: () => Promise<void>, successMsg: string) => {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
     const promise = new Promise(async function (resolve, reject) {
       try {
@@ -72,7 +72,7 @@ export const EvolveMint = () => {
       .then((result) => {
         console.log({ result });
         // toast.success("Congratulations, you have claimed your Kingpass");
-        // toast.success('successMsg');
+        toast.success(successMsg);
         setLoad(false);
       })
       .catch((err) => {
@@ -89,7 +89,10 @@ export const EvolveMint = () => {
   const handleMint = () => {
     const tokenId = consumableData?.token_id;
     const priceEth = consumablePrice?.priceInEth;
-    handleContractFunction(async () => await buyConsumable(address, tokenId, quantity, priceEth));
+    handleContractFunction(
+      async () => await buyConsumable(address, tokenId, quantity, priceEth),
+      `${quantity} Potions bought!`
+    );
   };
 
   return (
@@ -135,16 +138,6 @@ export const EvolveMint = () => {
                     )}
                   </MintButtonBox>
                 </MintPotionAction>
-                {/* <MintPotionFooter>
-                  <EtherValueContainer>
-                    <EtherIcon src={EthereumSvg} alt="ethereum-icon" />
-                    <EtherValue>{isConnected ? (price === 0 ? '-' : price) : '-'} ETH</EtherValue>
-                  </EtherValueContainer>
-                  <EtherValueContainer>
-                    <Label>Freebies</Label>
-                    <FreebiesValue>{isConnected ? (freebies === 0 ? '-' : freebies) : '-'}</FreebiesValue>
-                  </EtherValueContainer>
-                </MintPotionFooter> */}
                 <MintPotionFooter>
                   <EtherValueContainer>
                     <Label>
@@ -395,13 +388,6 @@ const MintPotionFooter = styled.div`
 `;
 
 const EtherValueContainer = styled.div`
-  /* display: flex;
-  gap: 15px;
-  justify-content: center;
-  align-items: center;
-  @media screen and (max-width: 960px) {
-    gap: 9px;
-  } */
   display: flex;
   gap: 3px;
   justify-content: center;
@@ -426,11 +412,6 @@ const EtherValue = styled.div`
 `;
 
 const Label = styled.div`
-  /* color: #f2f5f4;
-  font-size: 15px;
-  @media screen and (max-width: 960px) {
-    font-size: 12px;
-  } */
   font-size: 13px;
   color: #ff7b03;
   text-transform: uppercase;

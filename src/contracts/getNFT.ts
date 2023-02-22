@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 import axios from 'axios'
+import contracts from './contracts.json'
 
 export const getTokenIdsfromMoralis = async (address: string | undefined) => {
     const response = await axios.get(
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        `https://deep-index.moralis.io/api/v2/${address}/nft?chain=eth&format=decimal&disable_total=true&token_addresses=0xbe0de82207db8d49f841f3c9253fb6233ac2d821&normalizeMetadata=false`,
+        `https://deep-index.moralis.io/api/v2/${address}/nft?chain=eth&format=decimal&disable_total=true&token_addresses=${contracts.KingFlokiNFTs.address}&normalizeMetadata=false`,
         {
             headers: {
                 "X-API-Key": "MzNTP6Va9rSfQqVeHP3xlRHyOk7ArxfIkA1WLxE6bWwGHi5UBQiDt8qySKqiFIEP",
