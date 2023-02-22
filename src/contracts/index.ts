@@ -128,21 +128,21 @@ export const getNftsFromApi = async (handleStatus: (value: number) => Promise<vo
     handleStatus(5);
     /* eslint-disable no-console */
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    console.log(`tokens ${NftToMint} minted`)
+    toast.success(`tokens ${NftToMint.length} minted`)
 
     // show nft images & data
-    const finalResult = [];
-    // loop for every nft id
-    for (const single_nft of NftIds) {
-        // get nft info
-        const nft_info = await axios.get(`https://testwebhooks.kingfinance.co/tokenInfo?tokenId=${parseInt(single_nft)}`);
-        // get nft image
-        const nft_image = await axios.get(`https://testwebhooks.kingfinance.co/tokenImage?tokenId=${parseInt(single_nft)}`);
-        // push to final results
-        finalResult.push({ nft_info: nft_info.data, nft_image: nft_image.data })
-    }
+    // const finalResult = [];
+    // // loop for every nft id
+    // for (const single_nft of NftIds) {
+    //     // get nft info
+    //     const nft_info = await axios.get(`https://testwebhooks.kingfinance.co/tokenInfo?tokenId=${parseInt(single_nft)}`);
+    //     // get nft image
+    //     const nft_image = await axios.get(`https://testwebhooks.kingfinance.co/tokenImage?tokenId=${parseInt(single_nft)}`);
+    //     // push to final results
+    //     finalResult.push({ nft_info: nft_info.data, nft_image: nft_image.data })
+    // }
 
-    console.log("finalResults", finalResult);
+    // console.log("finalResults", finalResult);
 
     return true;
 }
