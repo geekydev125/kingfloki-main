@@ -167,6 +167,28 @@ export const isAbleToConnect = async (address: string | undefined) => {
     }
 }
 
+// export const isAbleToEvolve = async (address: string | undefined) => {
+//     if (address !== undefined) {
+//         console.log("isAbleToEvolve")
+//         const result = {
+//             isAble: false,
+//             message: ""
+//         }
+//         await axios.get('https://testwebhooks.kingfinance.co/mainConfig?app_id=1').then((res) => {
+//             const consumableSystem = res.data.consumableSystem;
+//            if(consumableSystem.consumableRequestPermitted !== false && consumableSystem.consumablePermitted !== false) {
+
+//            } else {
+//                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+//                 result.message = `${consumableSystem.infoMessage} ${consumableSystem.errorMessage}`;
+//            }
+//         }).catch(function(err) {
+//             console.log(err);
+//         });
+//         return result;
+//     }
+// }
+
 // Consumable
 export const getConsumableData = async () => {
     const res = await axios.get('https://testwebhooks.kingfinance.co/consumableData');

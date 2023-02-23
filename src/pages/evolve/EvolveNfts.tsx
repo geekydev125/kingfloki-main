@@ -207,9 +207,7 @@ export const EvolveNFTs = (props: potionProps) => {
       handleContractFunction(
         async () =>
           await useConsumable(tokenId, usageId, tokenIds, quantities, handleStatus).then(async () => {
-            console.log('hello');
             setTimeout(async () => {
-              console.log('hi');
               handleStatus(3);
               await getNftsFromApi(handleStatus).then(async () => {
                 setLoadingNft(true);

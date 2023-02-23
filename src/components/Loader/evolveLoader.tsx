@@ -1,5 +1,5 @@
 import styled, { keyframes } from 'styled-components';
-import { LoaderVideo, EbmLoaderVideo } from 'src/config/image';
+import { PotionLoaderMp4, PotionLoaderWebm } from 'src/config/image';
 
 interface MintLoaderProps {
   value: number;
@@ -50,8 +50,8 @@ export const EvolveLoader = (props: MintLoaderProps) => {
         <StepLabel>step {value} / 5</StepLabel>
         <RandomLabel>{randomLabel}</RandomLabel>
         <LoaderGif playsInline loop autoPlay muted id="my-video-desktop">
-          <source src={LoaderVideo} type='video/mp4; codecs="hvc1"' id="background-video-source-desktop" />
-          <source src={EbmLoaderVideo} type="video/webm"></source>
+          <source src={PotionLoaderMp4} type='video/mp4; codecs="hvc1"' id="background-video-source-desktop" />
+          <source src={PotionLoaderWebm} type="video/webm"></source>
           Your browser does not support the video tag.
         </LoaderGif>
         {(value === 2 || value === 4) && <HangonLabel>Hang on a moment</HangonLabel>}
