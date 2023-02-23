@@ -107,22 +107,22 @@ export const EvolveMint = (props: potionProps) => {
   };
 
   const handleMint = async () => {
-    // if (canEvolve?.isAble === false) {
-    //   toast.error(canEvolve.message);
-    // } else {
-    const tokenId = consumableData?.token_id;
-    if (tokenId !== undefined) {
-      const priceEth = consumablePrice?.priceInEth;
-      handleContractFunction(
-        async () =>
-          await buyConsumable(address, tokenId, quantity, priceEth).then(() => {
-            const potionCnt = potionCount + quantity;
-            setPotionCount(potionCnt);
-          }),
-        `${quantity} Potions bought!`
-      );
+    if (canEvolve?.isAble === false) {
+      toast.error(canEvolve.message);
+    } else {
+      const tokenId = consumableData?.token_id;
+      if (tokenId !== undefined) {
+        const priceEth = consumablePrice?.priceInEth;
+        handleContractFunction(
+          async () =>
+            await buyConsumable(address, tokenId, quantity, priceEth).then(() => {
+              const potionCnt = potionCount + quantity;
+              setPotionCount(potionCnt);
+            }),
+          `${quantity} Potions bought!`
+        );
+      }
     }
-    // }
   };
 
   return (
