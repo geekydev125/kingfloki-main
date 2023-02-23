@@ -10,11 +10,11 @@ let provider: any
 let NFT: Contract;
 
 let NFTWithSigner: Contract;
-
+let kingPass: Contract;
 export const initializeWeb3 = async (provider_: any, signer_: any) => {
     NFTWithSigner = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, signer_);
     NFT = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, provider_);
-
+    kingPass = new ethers.Contract(contracts.KingPass.address, contracts.KingPass.abi, signer);
     provider = provider_;
     signer = signer_;
     return true;
@@ -167,27 +167,38 @@ export const isAbleToConnect = async (address: string | undefined) => {
     }
 }
 
-// export const isAbleToEvolve = async (address: string | undefined) => {
-//     if (address !== undefined) {
-//         console.log("isAbleToEvolve")
-//         const result = {
-//             isAble: false,
-//             message: ""
-//         }
-//         await axios.get('https://testwebhooks.kingfinance.co/mainConfig?app_id=1').then((res) => {
-//             const consumableSystem = res.data.consumableSystem;
-//            if(consumableSystem.consumableRequestPermitted !== false && consumableSystem.consumablePermitted !== false) {
-
-//            } else {
-//                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-//                 result.message = `${consumableSystem.infoMessage} ${consumableSystem.errorMessage}`;
-//            }
-//         }).catch(function(err) {
-//             console.log(err);
-//         });
-//         return result;
-//     }
-// }
+export const isAbleToEvolve = async (address: string | undefined) => {
+    if (address !== undefined) {
+        console.log("isAbleToEvolve")
+        const result = {
+            isAble: false,
+            message: ""
+        }
+        await axios.get('https://testwebhooks.kingfinance.co/mainConfig?app_id=1').then(async (res) => {
+            const consumableSystem = res.data.consumableSystem;
+           if(consumableSystem.consumableRequestPermitted !== false && consumableSystem.consumablePermitted !== false) {
+               if(consumableSystem.kingPassOnly === true) {
+                    const isKingPass = await kingPass.checkIfPassActive(address);
+                    if(isKingPass === true) {
+                        result.isAble = true;
+                    } else {
+                        result.isAble = false;
+                        result.message = consumableSystem.kingPassMessage;
+                    }
+                } else {
+                    result.isAble = true;
+                }
+           } else {
+                result.isAble = false;
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                result.message = `${consumableSystem.infoMessage} ${consumableSystem.errorMessage}`;
+           }
+        }).catch(function(err) {
+            console.log(err);
+        });
+        return result;
+    }
+}
 
 // Consumable
 export const getConsumableData = async () => {

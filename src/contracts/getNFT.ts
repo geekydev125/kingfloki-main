@@ -21,6 +21,8 @@ export const getTokenIdsfromMoralis = async (address: string | undefined, chain:
     if(nftCount > 0) {
         for(let i = 0; i < nftCount; i++) {
             const amount = parseInt(response.data.result[i].amount);
+            const tokenId_ = response.data.result[i].token_id;
+            console.log({ tokenId_, amount })
             for(let j = 0; j < amount; j++) {
                 const tokenId = parseInt(response.data.result[i].token_id);
                 tokenIds.push(tokenId);

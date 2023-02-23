@@ -7,10 +7,11 @@ import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
-import { getConsumableData, buyConsumable, getConsumablePrice, getPotionCount } from 'src/contracts';
+import { getConsumableData, buyConsumable, getConsumablePrice, getPotionCount, isAbleToEvolve } from 'src/contracts';
 import { toast } from 'react-toastify';
 import { consumablePriceProps, getConsumable } from './EvolveNfts';
 import { potionProps } from '.';
+import { useWeb3Store } from 'src/context/web3context';
 
 export interface consumableTypes {
   token_id: number;
@@ -23,6 +24,11 @@ export interface consumableTypes {
   };
 }
 
+interface canEvolveTypes {
+  isAble: boolean;
+  message: string;
+}
+
 export const EvolveMint = (props: potionProps) => {
   const { potionCount, setPotionCount } = props;
   const [quantity, setQuantity] = useState(1);
@@ -31,7 +37,9 @@ export const EvolveMint = (props: potionProps) => {
   const [price, setPrice] = useState('0.005');
   const [consumableData, setConsumableData] = useState<consumableTypes>();
   const [consumablePrice, setConsumablePrice] = useState<consumablePriceProps>();
+  const [canEvolve, setCanEvolve] = useState<canEvolveTypes>();
   const { isConnected, address } = useAccount();
+  const { isInitialized } = useWeb3Store();
 
   const handleClick = (symbol: string) => {
     let num = quantity;
@@ -59,6 +67,15 @@ export const EvolveMint = (props: potionProps) => {
       setConsumableData(res);
     })();
   }, []);
+
+  useEffect(() => {
+    if (isInitialized) {
+      (async () => {
+        const result = await isAbleToEvolve(address);
+        setCanEvolve(result);
+      })();
+    }
+  }, [isInitialized]);
 
   const handleContractFunction = (func: () => Promise<void>, successMsg: string) => {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
@@ -90,6 +107,9 @@ export const EvolveMint = (props: potionProps) => {
   };
 
   const handleMint = async () => {
+    // if (canEvolve?.isAble === false) {
+    //   toast.error(canEvolve.message);
+    // } else {
     const tokenId = consumableData?.token_id;
     if (tokenId !== undefined) {
       const priceEth = consumablePrice?.priceInEth;
@@ -102,6 +122,7 @@ export const EvolveMint = (props: potionProps) => {
         `${quantity} Potions bought!`
       );
     }
+    // }
   };
 
   return (
