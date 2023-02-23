@@ -158,6 +158,7 @@ export const EvolveNFTs = (props: potionProps) => {
       })
       .catch((err) => {
         console.log({ err });
+        handleStatus(0);
         // toast.error(`you need to wait at least 24 hours to withdraw your $KING`, err);
         const revertData = err.reason;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -207,13 +208,12 @@ export const EvolveNFTs = (props: potionProps) => {
       handleStatus(1);
       handleContractFunction(
         async () =>
-          await useConsumable(tokenId, usageId, tokenIds, quantities).then(async () => {
-            setLoadingNft(true);
-            handleStatus(2);
+          await useConsumable(tokenId, usageId, tokenIds, quantities, handleStatus).then(async () => {
             setTimeout(async () => {
-              await evolveNftInitialize().then(async () => {
-                handleStatus(3);
-                await getNftsFromApi(handleStatus);
+              handleStatus(3);
+              await getNftsFromApi(handleStatus).then(async () => {
+                setLoadingNft(true);
+                await evolveNftInitialize();
               });
             }, 4000);
           }),
