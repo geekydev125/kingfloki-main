@@ -8,12 +8,13 @@ import { useAccount, useNetwork } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
-import { getConsumableData, getConsumablePrice, getPotionCount, useConsumable } from 'src/contracts';
+import { getConsumableData, getConsumablePrice, getNftsFromApi, getPotionCount, useConsumable } from 'src/contracts';
 import { consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
 import { MiniSpinner } from 'src/components/Spinner';
 import { potionProps } from '.';
 import { useWeb3Store } from 'src/context/web3context';
+import { MintLoader } from 'src/components/Loader/mintLoader';
 
 interface nftDataProps {
   id: number;
@@ -65,6 +66,7 @@ export const EvolveNFTs = (props: potionProps) => {
   const [rareCnt, setRareCnt] = useState(0);
   const [epicCnt, setEpicCnt] = useState(0);
   const [isLoad, setLoad] = useState(false);
+  const [mintStatus, setMintStatus] = useState(0);
   const { isInitialized } = useWeb3Store();
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
@@ -169,6 +171,11 @@ export const EvolveNFTs = (props: potionProps) => {
     setEvolve(inputValue);
   };
 
+  const handleStatus = async (value: number) => {
+    setMintStatus(value);
+    console.log(value);
+  };
+
   const handleNFTData = (id: number) => {
     const newSelected = [...nftArr];
     newSelected[id].isSelected = !newSelected[id].isSelected;
@@ -197,12 +204,17 @@ export const EvolveNFTs = (props: potionProps) => {
     const tokenId = consumableData?.token_id;
     if (usageId !== undefined && tokenId !== undefined) {
       console.log({ tokenId, usageId, tokenIds, quantities });
+      handleStatus(1);
       handleContractFunction(
         async () =>
           await useConsumable(tokenId, usageId, tokenIds, quantities).then(async () => {
             setLoadingNft(true);
+            handleStatus(2);
             setTimeout(async () => {
-              await evolveNftInitialize();
+              await evolveNftInitialize().then(async () => {
+                handleStatus(3);
+                await getNftsFromApi(handleStatus);
+              });
             }, 4000);
           }),
         'Evolution completed!'
@@ -278,6 +290,7 @@ export const EvolveNFTs = (props: potionProps) => {
           </>
         )}
       </EvolveContent>
+      <MintLoader value={mintStatus} setValue={setMintStatus} />
     </EvolveNFTsContainer>
   );
 };
