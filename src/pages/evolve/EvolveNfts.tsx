@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 import { MiniSpinner } from 'src/components/Spinner';
 import { potionProps } from '.';
 import { useWeb3Store } from 'src/context/web3context';
-import { MintLoader } from 'src/components/Loader/mintLoader';
+import { EvolveLoader } from 'src/components/Loader/evolveLoader';
 
 interface nftDataProps {
   id: number;
@@ -152,14 +152,12 @@ export const EvolveNFTs = (props: potionProps) => {
     promise
       .then((result) => {
         console.log({ result });
-        // toast.success("Congratulations, you have claimed your Kingpass");
         toast.success(successMsg);
         setLoad(false);
       })
       .catch((err) => {
         console.log({ err });
         handleStatus(0);
-        // toast.error(`you need to wait at least 24 hours to withdraw your $KING`, err);
         const revertData = err.reason;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         toast.error(`Transaction failed: ${revertData}`);
@@ -290,7 +288,7 @@ export const EvolveNFTs = (props: potionProps) => {
           </>
         )}
       </EvolveContent>
-      <MintLoader value={mintStatus} setValue={setMintStatus} />
+      <EvolveLoader value={mintStatus} setValue={setMintStatus} />
     </EvolveNFTsContainer>
   );
 };
