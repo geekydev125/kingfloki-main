@@ -56,6 +56,7 @@ export const requestMintRandomNft = async (handleStatus: (value: number) => Prom
         } else {
             const _randomAmount = await NFTMintCostInEth();
             if (_randomAmount !== undefined) {
+                console.log({_randomAmount});
                 const tx = await NFTWithSigner.requestMintRandomNft(ownerAddress, quantity, group_id, { value: _randomAmount.mul(quantity) });
                 handleStatus(2)
                 await tx.wait()
@@ -177,7 +178,6 @@ export const isKingPassHolder = async (address: string | undefined) => {
 
 export const isAbleToEvolve = async (address: string | undefined) => {
     if (address !== undefined) {
-        console.log("isAbleToEvolve")
         const result = {
             isAble: false,
             message: ""
@@ -214,7 +214,7 @@ export const getConsumableData = async () => {
     return res.data.consumables_data[0];
 }
 
-export const getConsumablePrice = async (consumableId: number) => {
+export const getConsumableValue = async (consumableId: number) => {
     if(provider !== null && provider !== undefined) {
         const tx = await NFT.consumables(consumableId);
         const consumablePrice = {
@@ -223,16 +223,17 @@ export const getConsumablePrice = async (consumableId: number) => {
             priceInKing: parseFloat(tx.priceInKing),
             usageId: parseInt(tx.usageId)
         }
+        console.log({ consumablePrice })
         return consumablePrice;
     }
 }
 
 export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number, priceEth: number | undefined) => {
-    let value_ = 0;
-    if(priceEth != null) value_ = quantity * priceEth;
-    console.log({ value_, priceEth, quantity })
-    const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: value_ });
-    await tx.wait();
+    if(priceEth !== undefined) {
+        console.log(priceEth * quantity);
+        const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: priceEth * quantity });
+        await tx.wait();
+    }
 }
 
 export const useConsumable = async (consumableId: number, usageId: number, nftIds: number[], quantity: number[], handleStatus: (value: number) => void) => {

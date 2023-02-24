@@ -10,7 +10,7 @@ import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
 import {
   getConsumableData,
-  getConsumablePrice,
+  getConsumableValue,
   getNftsFromApi,
   getPotionCount,
   isAbleToEvolve,
@@ -22,6 +22,7 @@ import { MiniSpinner } from 'src/components/Spinner';
 import { potionProps } from '.';
 import { useWeb3Store } from 'src/context/web3context';
 import { EvolveLoader } from 'src/components/Loader/evolveLoader';
+import { ethers } from 'ethers';
 
 interface nftDataProps {
   id: number;
@@ -44,18 +45,22 @@ export interface getConsumableProps {
   setConsumablePrice: (value: consumablePriceProps | undefined) => void;
   setConsumableData: (value: consumableTypes) => void;
   setPotionCount: (value: number) => void;
+  setPrice: (value: string) => void;
   address: string | undefined;
 }
 
 export const getConsumable = async (props: getConsumableProps) => {
-  const { setConsumablePrice, setConsumableData, setPotionCount, address } = props;
+  const { setConsumablePrice, setConsumableData, setPotionCount, setPrice, address } = props;
   const res = await getConsumableData();
-  const consumablePrice_ = await getConsumablePrice(res.token_id);
+  const consumablePrice_ = await getConsumableValue(res.token_id);
   console.log({ consumablePrice_ });
   const potionCnt = await getPotionCount(address, res.token_id);
   setConsumablePrice(consumablePrice_);
   setConsumableData(res);
   setPotionCount(potionCnt);
+  const priceInEth_ = consumablePrice_?.priceInEth.toString() ?? '0';
+  const priceInEth = parseFloat(ethers.utils.formatEther(priceInEth_)).toFixed(3);
+  setPrice(priceInEth);
 };
 
 export const EvolveNFTs = (props: potionProps) => {
@@ -75,6 +80,7 @@ export const EvolveNFTs = (props: potionProps) => {
   const [isLoad, setLoad] = useState(false);
   const [mintStatus, setMintStatus] = useState(0);
   const [canEvolve, setCanEvolve] = useState<canEvolveTypes>();
+  const [price, setPrice] = useState('0');
   const { isInitialized } = useWeb3Store();
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
@@ -111,6 +117,7 @@ export const EvolveNFTs = (props: potionProps) => {
       setConsumablePrice,
       setConsumableData,
       setPotionCount,
+      setPrice,
       address
     };
     await getConsumable(props);
@@ -120,6 +127,7 @@ export const EvolveNFTs = (props: potionProps) => {
   const checkIsAbleToEvolve = async () => {
     const res = await isAbleToEvolve(address);
     setCanEvolve(res);
+    setTimeout(async () => await checkIsAbleToEvolve(), 60000);
   };
 
   useEffect(() => {
@@ -173,7 +181,7 @@ export const EvolveNFTs = (props: potionProps) => {
       .catch((err) => {
         console.log({ err });
         handleStatus(0);
-        const revertData = err.reason;
+        const revertData = err.reason || err.message;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         toast.error(`Transaction failed: ${revertData}`);
         // errMsg !== "" ? toast.error(errMsg, err) :
@@ -278,7 +286,10 @@ export const EvolveNFTs = (props: potionProps) => {
             <PotionLabel label="Your Potions" value={potionCount} />
             <SelectLabel label="Selected" value={`${selectedCount}/${rarityTotalCount}`} />
 
-            <EvolveButton disabled={!isEvolveButtonEnable || isLoad} onClick={async () => await handleEvolve()}>
+            <EvolveButton
+              disabled={!isEvolveButtonEnable || isLoad || parseInt(price) >= 1000}
+              onClick={async () => await handleEvolve()}
+            >
               {isLoad ? <MiniSpinner /> : 'Evolve'}
             </EvolveButton>
           </RadioProvider>

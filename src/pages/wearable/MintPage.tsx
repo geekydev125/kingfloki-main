@@ -52,7 +52,7 @@ export const MingPage = () => {
     const cost = await NFTMintCostInEth();
     // const cost = 0.033;
     if (cost !== undefined) {
-      const _cost = parseFloat(ethers.utils.formatEther(cost.toString())).toFixed(4);
+      const _cost = parseFloat(ethers.utils.formatEther(cost.toString())).toFixed(3);
       // setRandomMintCost(ethers.utils.formatEther(cost));
       setRandomMintCost(_cost.toString());
     }

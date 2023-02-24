@@ -7,11 +7,12 @@ import { useAccount } from 'wagmi';
 import { WalletConnectButton } from 'src/components/Button';
 import { Spinner } from 'src/components/Spinner';
 import { EthereumSvg, EvolveBg, PotionImg } from 'src/config/image';
-import { getConsumableData, buyConsumable, getConsumablePrice, getPotionCount, isAbleToEvolve } from 'src/contracts';
+import { getConsumableData, buyConsumable, getConsumableValue, getPotionCount, isAbleToEvolve } from 'src/contracts';
 import { toast } from 'react-toastify';
 import { consumablePriceProps, getConsumable } from './EvolveNfts';
 import { potionProps } from '.';
 import { useWeb3Store } from 'src/context/web3context';
+import { ethers } from 'ethers';
 
 export interface consumableTypes {
   token_id: number;
@@ -34,9 +35,9 @@ export const EvolveMint = (props: potionProps) => {
   const [quantity, setQuantity] = useState(1);
   const [freebies, setFreebies] = useState(0);
   const [isLoad, setLoad] = useState(false);
-  const [price, setPrice] = useState('0.005');
+  const [price, setPrice] = useState('0');
   const [consumableData, setConsumableData] = useState<consumableTypes>();
-  const [consumablePrice, setConsumablePrice] = useState<consumablePriceProps>();
+  const [consumable, setConsumable] = useState<consumablePriceProps>();
   const [canEvolve, setCanEvolve] = useState<canEvolveTypes>();
   const { isConnected, address } = useAccount();
   const { isInitialized } = useWeb3Store();
@@ -61,10 +62,12 @@ export const EvolveMint = (props: potionProps) => {
   useEffect(() => {
     (async () => {
       const res = await getConsumableData();
-      const consumablePrice_ = await getConsumablePrice(res.token_id);
-      setConsumablePrice(consumablePrice_);
-      console.log({ res });
+      const consumable_ = await getConsumableValue(res.token_id);
+      setConsumable(consumable_);
       setConsumableData(res);
+      const priceInEth_ = consumable_?.priceInEth.toString() ?? '0';
+      const priceInEth = parseFloat(ethers.utils.formatEther(priceInEth_)).toFixed(3);
+      setPrice(priceInEth);
     })();
   }, []);
 
@@ -101,7 +104,7 @@ export const EvolveMint = (props: potionProps) => {
       .catch((err) => {
         console.log({ err });
         // toast.error(`you need to wait at least 24 hours to withdraw your $KING`, err);
-        const revertData = err.reason;
+        const revertData = err.reason || err.message;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         toast.error(`Transaction failed: ${revertData}`);
         // errMsg !== "" ? toast.error(errMsg, err) :
@@ -115,7 +118,7 @@ export const EvolveMint = (props: potionProps) => {
     } else {
       const tokenId = consumableData?.token_id;
       if (tokenId !== undefined) {
-        const priceEth = consumablePrice?.priceInEth;
+        const priceEth = consumable?.priceInEth;
         handleContractFunction(
           async () =>
             await buyConsumable(address, tokenId, quantity, priceEth).then(() => {
@@ -144,7 +147,7 @@ export const EvolveMint = (props: potionProps) => {
                     <MintInput
                       type="number"
                       min={1}
-                      value={quantity}
+                      value={quantity === 0 ? 1 : quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
                     />
                     <OperationBtn onClick={() => handleClick('plus')}>+</OperationBtn>
@@ -163,8 +166,8 @@ export const EvolveMint = (props: potionProps) => {
                       </MintButton>
                     )} */}
                     {isConnected ? (
-                      <MintButton disabled={isLoad} onClick={async () => await handleMint()}>
-                        {isLoad ? <Spinner /> : 'Mint Now'}
+                      <MintButton disabled={isLoad || parseInt(price) >= 1000} onClick={async () => await handleMint()}>
+                        {isLoad ? <Spinner /> : parseInt(price) >= 1000 ? 'Cannot Mint Now' : 'Mint Now'}
                       </MintButton>
                     ) : (
                       <WalletConnectButton />

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface GiftCardProps {
@@ -11,6 +12,7 @@ interface GiftCardProps {
 
 export const GiftCard = (props: GiftCardProps) => {
   const { img, titleImg, title, content, btnName, link } = props;
+  const navigate = useNavigate();
   return (
     <GiftCardContainer>
       <GiftCardImg src={img} alt="gift-card-img" />
@@ -21,9 +23,13 @@ export const GiftCard = (props: GiftCardProps) => {
         </GiftCardTitle>
         <GiftCardDetail>{content}</GiftCardDetail>
         <GiftCardAction>
-          <ALink href={link} rel="noreferror noopener" target="_blank">
-            <ComingSoonButton>{btnName}</ComingSoonButton>
-          </ALink>
+          {link.startsWith('https') ? (
+            <ALink href={link} rel="noreferror noopener" target={'_blank'}>
+              <ComingSoonButton>{btnName}</ComingSoonButton>
+            </ALink>
+          ) : (
+            <ComingSoonButton onClick={() => navigate(link)}>{btnName}</ComingSoonButton>
+          )}
         </GiftCardAction>
       </GiftCardContent>
     </GiftCardContainer>
