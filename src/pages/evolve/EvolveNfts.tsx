@@ -184,23 +184,21 @@ export const EvolveNFTs = (props: potionProps) => {
   const handleEvolve = async () => {
     const tokenIds: number[] = [];
     const quantities: number[] = [];
-    const tempTokenIds: number[] = [];
+    let lastTokenId;
     let quantity = 1;
     for (let i = 0; i < nftArr.length; i++) {
       if (nftArr[i].isSelected) {
-        const tokenId_: number = tempTokenIds.at(tempTokenIds.length - 1) ?? 0;
         const tokenId: number = nftArr[i].token_id;
-        console.log({ tokenId_, tokenId });
-        if (tokenId_ === tokenId) {
+        if (lastTokenId === tokenId) {
           console.log('+++++++');
           quantity++;
           quantities[quantities.length - 1] = quantity;
         } else {
+          quantity = 1;
           tokenIds.push(tokenId);
           quantities.push(quantity);
-          quantity = 1;
         }
-        tempTokenIds.push(tokenId);
+        lastTokenId = nftArr[i].token_id;
         console.log({ quantity });
         // for (let j = 0; j < tokenIds.length; j++) {
         //   console.log('nftArr[i].token_id: ', nftArr[i].token_id);
@@ -216,7 +214,7 @@ export const EvolveNFTs = (props: potionProps) => {
         // quantities.push(quantity);
       }
     }
-    console.log({ tokenIds, quantities, tempTokenIds });
+    console.log({ tokenIds, quantities });
     const usageId = consumablePrice?.usageId;
     const tokenId = consumableData?.token_id;
     if (usageId !== undefined && tokenId !== undefined) {
