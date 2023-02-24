@@ -36,8 +36,8 @@ interface nftDataProps {
 
 export interface consumablePriceProps {
   isConsumable: boolean;
-  priceInEth: number;
-  priceInKing: number;
+  priceInEth: string;
+  priceInKing: string;
   usageId: number;
 }
 
@@ -58,8 +58,9 @@ export const getConsumable = async (props: getConsumableProps) => {
   setConsumablePrice(consumablePrice_);
   setConsumableData(res);
   setPotionCount(potionCnt);
-  const priceInEth_ = consumablePrice_?.priceInEth.toString() ?? '0';
-  const priceInEth = parseFloat(ethers.utils.formatEther(priceInEth_)).toFixed(3);
+  console.log('priceInEth_', consumablePrice_?.priceInEth);
+  const priceInEth_ = consumablePrice_?.priceInEth ?? '0';
+  const priceInEth = parseFloat(priceInEth_).toFixed(3);
   setPrice(priceInEth);
 };
 

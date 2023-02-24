@@ -65,8 +65,8 @@ export const EvolveMint = (props: potionProps) => {
       const consumable_ = await getConsumableValue(res.token_id);
       setConsumable(consumable_);
       setConsumableData(res);
-      const priceInEth_ = consumable_?.priceInEth.toString() ?? '0';
-      const priceInEth = parseFloat(ethers.utils.formatEther(priceInEth_)).toFixed(3);
+      const priceInEth_ = consumable_?.priceInEth ?? '0';
+      const priceInEth = parseFloat(priceInEth_).toFixed(3);
       setPrice(priceInEth);
     })();
   }, []);

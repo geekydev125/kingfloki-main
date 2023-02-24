@@ -219,8 +219,8 @@ export const getConsumableValue = async (consumableId: number) => {
         const tx = await NFT.consumables(consumableId);
         const consumablePrice = {
             isConsumable: tx.isConsumable,
-            priceInEth: parseFloat(tx.priceInEth),
-            priceInKing: parseFloat(tx.priceInKing),
+            priceInEth: ethers.utils.formatUnits(tx.priceInEth, 18),
+            priceInKing: ethers.utils.formatUnits(tx.priceInEth, 9),
             usageId: parseInt(tx.usageId)
         }
         console.log({ consumablePrice })
@@ -228,10 +228,11 @@ export const getConsumableValue = async (consumableId: number) => {
     }
 }
 
-export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number, priceEth: number | undefined) => {
+export const buyConsumable = async (addy: string | undefined, consumableId: number | undefined, quantity: number, priceEth: string | undefined) => {
     if(priceEth !== undefined) {
-        console.log(priceEth * quantity);
-        const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: priceEth * quantity });
+        const _priceEth = ethers.utils.parseEther(priceEth);
+        console.log("buyConsumablevalue: ", _priceEth.mul(quantity))
+        const tx = await NFTWithSigner.buyConsumable(addy, consumableId, quantity, { value: _priceEth.mul(quantity) });
         await tx.wait();
     }
 }
