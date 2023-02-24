@@ -171,7 +171,7 @@ export const isKingPassHolder = async (address: string | undefined) => {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const res = await axios.get(`https://testwebhooks.kingfinance.co/userHasKingPass?owner=${address}`);
     const isKingPass = res.data.status;
-    console.log({ isKingPass })
+    console.log({ res, address })
     return isKingPass
 }
 

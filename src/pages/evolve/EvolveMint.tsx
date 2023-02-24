@@ -68,13 +68,15 @@ export const EvolveMint = (props: potionProps) => {
     })();
   }, []);
 
+  const checkIsAbleToEvolve = async () => {
+    const res = await isAbleToEvolve(address);
+    setCanEvolve(res);
+    setTimeout(async () => await checkIsAbleToEvolve(), 60000);
+  };
+
   useEffect(() => {
     if (isInitialized) {
-      (async () => {
-        const result = await isAbleToEvolve(address);
-        console.log({ result });
-        setCanEvolve(result);
-      })();
+      checkIsAbleToEvolve();
     }
   }, [isInitialized]);
 
