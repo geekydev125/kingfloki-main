@@ -10,7 +10,7 @@ const CardData = [
     title: 'Trade on Opensea',
     content:
       'Trade and purchase wearable collection on Opensea. Find specific wearable NFTs that you are looking for listed by other users.',
-    btnName: 'Coming Soon',
+    btnName: 'Trade Now',
     link: 'https://opensea.io/collection/kingflokiwearables'
   },
   {
@@ -19,7 +19,7 @@ const CardData = [
     title: 'Evolve your NFTs',
     content:
       'Once you have gathered enough common wearables that you are not interested in, you will be able to fuse them into rarer wearables.',
-    btnName: 'Coming Soon',
+    btnName: 'Evolve Now',
     link: '/evolve'
   }
 ];
