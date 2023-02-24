@@ -8,8 +8,15 @@ import { useAccount, useNetwork } from 'wagmi';
 import { PotionNFT } from 'src/components/NFT/PotionNFT';
 import { getNftData } from 'src/config/nftData';
 import { GettingNftLoader } from 'src/components/Loader/gettingNftLoader';
-import { getConsumableData, getConsumablePrice, getNftsFromApi, getPotionCount, useConsumable } from 'src/contracts';
-import { consumableTypes } from './EvolveMint';
+import {
+  getConsumableData,
+  getConsumablePrice,
+  getNftsFromApi,
+  getPotionCount,
+  isAbleToEvolve,
+  useConsumable
+} from 'src/contracts';
+import { canEvolveTypes, consumableTypes } from './EvolveMint';
 import { toast } from 'react-toastify';
 import { MiniSpinner } from 'src/components/Spinner';
 import { potionProps } from '.';
@@ -67,6 +74,7 @@ export const EvolveNFTs = (props: potionProps) => {
   const [epicCnt, setEpicCnt] = useState(0);
   const [isLoad, setLoad] = useState(false);
   const [mintStatus, setMintStatus] = useState(0);
+  const [canEvolve, setCanEvolve] = useState<canEvolveTypes>();
   const { isInitialized } = useWeb3Store();
 
   const commonTotalCount = consumableData?.requirements.common ?? 0;
@@ -109,9 +117,16 @@ export const EvolveNFTs = (props: potionProps) => {
     setLoadingNft(false);
   };
 
+  const checkIsAbleToEvolve = async () => {
+    const res = await isAbleToEvolve(address);
+    setCanEvolve(res);
+  };
+
   useEffect(() => {
-    if (isInitialized) evolveNftInitialize();
-    else {
+    if (isInitialized) {
+      evolveNftInitialize();
+      checkIsAbleToEvolve();
+    } else {
       setNftArr([]);
       setCommonCnt(0);
       setRareCnt(0);
@@ -182,57 +197,49 @@ export const EvolveNFTs = (props: potionProps) => {
   };
 
   const handleEvolve = async () => {
-    const tokenIds: number[] = [];
-    const quantities: number[] = [];
-    let lastTokenId;
-    let quantity = 1;
-    for (let i = 0; i < nftArr.length; i++) {
-      if (nftArr[i].isSelected) {
-        const tokenId: number = nftArr[i].token_id;
-        if (lastTokenId === tokenId) {
-          console.log('+++++++');
-          quantity++;
-          quantities[quantities.length - 1] = quantity;
-        } else {
-          quantity = 1;
-          tokenIds.push(tokenId);
-          quantities.push(quantity);
+    if (canEvolve?.isAble === false) {
+      toast.error(canEvolve.message);
+    } else {
+      const tokenIds: number[] = [];
+      const quantities: number[] = [];
+      let lastTokenId;
+      let quantity = 1;
+      for (let i = 0; i < nftArr.length; i++) {
+        if (nftArr[i].isSelected) {
+          const tokenId: number = nftArr[i].token_id;
+          if (lastTokenId === tokenId) {
+            console.log('+++++++');
+            quantity++;
+            quantities[quantities.length - 1] = quantity;
+          } else {
+            quantity = 1;
+            tokenIds.push(tokenId);
+            quantities.push(quantity);
+          }
+          lastTokenId = nftArr[i].token_id;
+          console.log({ quantity });
         }
-        lastTokenId = nftArr[i].token_id;
-        console.log({ quantity });
-        // for (let j = 0; j < tokenIds.length; j++) {
-        //   console.log('nftArr[i].token_id: ', nftArr[i].token_id);
-        //   console.log('tokenIds[j]: ', tokenIds[j]);
-        //   if (nftArr[i].token_id === tokenIds[j]) {
-        //     quantity++;
-        //     // tokenIds[j] = quantity;
-        //   }
-        // }
-        // if (quantity === 1) {
-        //   tokenIds.push(nftArr[i].token_id);
-        // }
-        // quantities.push(quantity);
       }
-    }
-    console.log({ tokenIds, quantities });
-    const usageId = consumablePrice?.usageId;
-    const tokenId = consumableData?.token_id;
-    if (usageId !== undefined && tokenId !== undefined) {
-      console.log({ tokenId, usageId, tokenIds, quantities });
-      handleStatus(1);
-      handleContractFunction(
-        async () =>
-          await useConsumable(tokenId, usageId, tokenIds, quantities, handleStatus).then(async () => {
-            setTimeout(async () => {
-              handleStatus(3);
-              await getNftsFromApi(handleStatus).then(async () => {
-                setLoadingNft(true);
-                await evolveNftInitialize();
-              });
-            }, 4000);
-          }),
-        'Evolution completed!'
-      );
+      console.log({ tokenIds, quantities });
+      const usageId = consumablePrice?.usageId;
+      const tokenId = consumableData?.token_id;
+      if (usageId !== undefined && tokenId !== undefined) {
+        console.log({ tokenId, usageId, tokenIds, quantities });
+        handleStatus(1);
+        handleContractFunction(
+          async () =>
+            await useConsumable(tokenId, usageId, tokenIds, quantities, handleStatus).then(async () => {
+              setTimeout(async () => {
+                handleStatus(3);
+                await getNftsFromApi(handleStatus).then(async () => {
+                  setLoadingNft(true);
+                  await evolveNftInitialize();
+                });
+              }, 4000);
+            }),
+          'Evolution completed!'
+        );
+      }
     }
   };
 

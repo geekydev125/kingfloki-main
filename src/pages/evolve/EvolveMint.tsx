@@ -24,7 +24,7 @@ export interface consumableTypes {
   };
 }
 
-interface canEvolveTypes {
+export interface canEvolveTypes {
   isAble: boolean;
   message: string;
 }
@@ -72,6 +72,7 @@ export const EvolveMint = (props: potionProps) => {
     if (isInitialized) {
       (async () => {
         const result = await isAbleToEvolve(address);
+        console.log({ result });
         setCanEvolve(result);
       })();
     }

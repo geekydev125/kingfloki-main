@@ -167,6 +167,14 @@ export const isAbleToConnect = async (address: string | undefined) => {
     }
 }
 
+export const isKingPassHolder = async (address: string | undefined) => {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const res = await axios.get(`https://testwebhooks.kingfinance.co/userHasKingPass?owner=${address}`);
+    const isKingPass = res.data
+    console.log({ isKingPass })
+    return isKingPass
+}
+
 export const isAbleToEvolve = async (address: string | undefined) => {
     if (address !== undefined) {
         console.log("isAbleToEvolve")
@@ -178,7 +186,7 @@ export const isAbleToEvolve = async (address: string | undefined) => {
             const consumableSystem = res.data.consumableSystem;
            if(consumableSystem.consumableRequestPermitted !== false && consumableSystem.consumablePermitted !== false) {
                if(consumableSystem.kingPassOnly === true) {
-                    const isKingPass = await kingPass.checkIfPassActive(address);
+                    const isKingPass = await isKingPassHolder(address);
                     if(isKingPass === true) {
                         result.isAble = true;
                     } else {
