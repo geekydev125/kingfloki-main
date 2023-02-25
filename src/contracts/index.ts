@@ -220,7 +220,7 @@ export const getConsumableValue = async (consumableId: number) => {
         const consumablePrice = {
             isConsumable: tx.isConsumable,
             priceInEth: ethers.utils.formatUnits(tx.priceInEth, 18),
-            priceInKing: ethers.utils.formatUnits(tx.priceInEth, 9),
+            priceInKing: ethers.utils.formatUnits(tx.priceInKing, 9),
             usageId: parseInt(tx.usageId)
         }
         console.log({ consumablePrice })
