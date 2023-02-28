@@ -1,11 +1,12 @@
 import axios from "axios";
 import { getTokenIdsfromMoralis } from "src/contracts/getNFT";
+import { apiName } from "./product";
 
 export const getNftData = async (address: string | undefined, chain: number | undefined) => {
     const tokenIds = await getTokenIdsfromMoralis(address, chain);
     const nftData = [];
         const response_info = await axios.post(
-            `https://testwebhooks.kingfinance.co/bulkTokenInfo`,
+            `https://${apiName}.kingfinance.co/bulkTokenInfo`,
             tokenIds,
             {
                 headers: {
@@ -18,7 +19,7 @@ export const getNftData = async (address: string | undefined, chain: number | un
 
         for(let i = 0; i < res.length; i++) {
           const tokenId = tokenIds[i];
-          const response_image = `https://testwebhooks.kingfinance.co/tokenImage?tokenId=${tokenId}`
+          const response_image = `https://${apiName}.kingfinance.co/tokenImage?tokenId=${tokenId}`
           const nft = {
             id: i,
             token_id: tokenId,

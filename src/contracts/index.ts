@@ -3,6 +3,7 @@ import { ethers, Contract } from 'ethers';
 import contracts from './contracts.json';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { apiName, contractAddy } from '../config/product'
 
 let signer: any;
 let provider: any
@@ -12,9 +13,10 @@ let NFT: Contract;
 let NFTWithSigner: Contract;
 let kingPass: Contract;
 export const initializeWeb3 = async (provider_: any, signer_: any) => {
-    NFTWithSigner = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, signer_);
-    NFT = new ethers.Contract(contracts.KingFlokiNFTs.address, contracts.KingFlokiNFTs.abi, provider_);
-    kingPass = new ethers.Contract(contracts.KingPass.address, contracts.KingPass.abi, signer);
+    
+    NFTWithSigner = new ethers.Contract(contractAddy, contracts.KingFlokiNFTs.abi, signer_);
+    NFT = new ethers.Contract(contractAddy, contracts.KingFlokiNFTs.abi, provider_);
+    kingPass = new ethers.Contract(contractAddy, contracts.KingPass.abi, signer);
     provider = provider_;
     signer = signer_;
     return true;
@@ -72,7 +74,7 @@ const generateTicketApi = async (ownerAddress: string, handleStatus: (value: num
     let api_call;
     try {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        api_call = await axios.get(`https://testwebhooks.kingfinance.co/pendingNfts?owner=${ownerAddress}`);
+        api_call = await axios.get(`https://${apiName}.kingfinance.co/pendingNfts?owner=${ownerAddress}`);
     } catch (error) {
         console.log("error: ", error)
         toast.error("sorry! something went wrong! ask help in the official group");
@@ -151,7 +153,7 @@ export const isAbleToConnect = async (address: string | undefined) => {
     if (address !== undefined) {
         console.log("isAbleToConnect")
         let isAble = 0;
-        await axios.get('https://testwebhooks.kingfinance.co/mainConfig?app_id=1').then((res) => {
+        await axios.get(`https://${apiName}.kingfinance.co/mainConfig?app_id=1`).then((res) => {
             const mintSystem = res.data.mintSystem;
             console.log(mintSystem.mintRequestPermitted, mintSystem.mintPermitted)
             if(res.data.error === true) {
@@ -170,7 +172,7 @@ export const isAbleToConnect = async (address: string | undefined) => {
 
 export const isKingPassHolder = async (address: string | undefined) => {
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const res = await axios.get(`https://testwebhooks.kingfinance.co/userHasKingPass?owner=${address}`);
+    const res = await axios.get(`https://${apiName}.kingfinance.co/userHasKingPass?owner=${address}`);
     const isKingPass = res.data.status;
     console.log({ res, address })
     return isKingPass
@@ -182,7 +184,7 @@ export const isAbleToEvolve = async (address: string | undefined) => {
             isAble: false,
             message: ""
         }
-        await axios.get('https://testwebhooks.kingfinance.co/mainConfig?app_id=1').then(async (res) => {
+        await axios.get(`https://${apiName}.kingfinance.co/mainConfig?app_id=1`).then(async (res) => {
             const consumableSystem = res.data.consumableSystem;
            if(consumableSystem.consumableRequestPermitted !== false && consumableSystem.consumablePermitted !== false) {
                if(consumableSystem.kingPassOnly === true) {
@@ -210,7 +212,7 @@ export const isAbleToEvolve = async (address: string | undefined) => {
 
 // Consumable
 export const getConsumableData = async () => {
-    const res = await axios.get('https://testwebhooks.kingfinance.co/consumableData');
+    const res = await axios.get(`https://${apiName}.kingfinance.co/consumableData`);
     return res.data.consumables_data[0];
 }
 
