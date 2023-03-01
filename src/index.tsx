@@ -26,13 +26,13 @@ import { publicProvider } from 'wagmi/providers/public';
 import '@rainbow-me/rainbowkit/styles.css';
 
 import 'react-toastify/dist/ReactToastify.min.css';
-import { isProduction } from './config/product';
+import { isTest } from './config/test';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 window.Buffer = require('buffer').Buffer;
 
 const { chains, provider } = configureChains(
-  [isProduction ? mainnet : polygonMumbai],
+  [isTest ? polygonMumbai : mainnet],
   [alchemyProvider({ apiKey: '2bUhHtQMTtBoddEB-hRwtnL6fZ6Y5Gnu' }), publicProvider()]
 );
 

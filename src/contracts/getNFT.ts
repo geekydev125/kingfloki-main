@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import axios from 'axios'
-import { contractAddy } from 'src/config/product';
+import { contractAddy } from 'src/config/test';
 
 export const getTokenIdsfromMoralis = async (address: string | undefined, chain: number | undefined) => {
     const chain_ = chain === 80001 ? "mumbai" : "eth";

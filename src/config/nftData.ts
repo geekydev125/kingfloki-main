@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getTokenIdsfromMoralis } from "src/contracts/getNFT";
-import { apiName } from "./product";
+import { apiName } from "./test";
 
 export const getNftData = async (address: string | undefined, chain: number | undefined) => {
     const tokenIds = await getTokenIdsfromMoralis(address, chain);
